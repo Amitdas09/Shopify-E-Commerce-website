@@ -7,172 +7,176 @@
    via data-purelane-scene, and this crossfades between four depths.
    ========================================================================== */
 
-.purelane-scenes {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  overflow: hidden;
-  background: #eee7fb;
-}
+@layer purelane-base, purelane-section;
 
-.purelane-scenes .scene {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  transition: opacity 1.5s ease;
-}
-
-.purelane-scenes .scene.on { opacity: 1; }
-
-.purelane-scenes .s1 { background: linear-gradient(178deg, #fbfffb 0%, #eafaec 24%, #d6f1dc 54%, #bfe8ca 100%); }
-.purelane-scenes .s2 { background: linear-gradient(178deg, #f6fdf7 0%, #e3f7e7 26%, #cbedd4 58%, #b2e2c2 100%); }
-.purelane-scenes .s3 { background: linear-gradient(178deg, #f0fbf2 0%, #d9f2df 28%, #bde6c8 60%, #a2d9b6 100%); }
-.purelane-scenes .s4 { background: linear-gradient(178deg, #e9f8ec 0%, #cdedd6 30%, #addcbe 62%, #8ecdaa 100%); }
-
-/* ---------- caustics ---------- */
-
-.purelane-scenes .water {
-  position: absolute;
-  inset: -14% -10%;
-  pointer-events: none;
-  transition: opacity 1.2s ease;
-}
-
-.purelane-scenes .wl {
-  position: absolute;
-  inset: 0;
-  will-change: transform;
-  translate: var(--px, 0) var(--py, 0);
-}
-
-.purelane-scenes .wl .sv { width: 100%; height: 100%; }
-
-.purelane-scenes .wl-a {
-  mix-blend-mode: soft-light;
-  opacity: 1;
-  animation: purelane-drift-a 34s linear infinite;
-}
-
-.purelane-scenes .wl-a .sv { filter: contrast(1.25); }
-
-.purelane-scenes .wl-b {
-  mix-blend-mode: overlay;
-  opacity: 0.66;
-  animation: purelane-drift-b 23s linear infinite;
-}
-
-.purelane-scenes .wl-c {
-  mix-blend-mode: overlay;
-  opacity: 0.6;
-  animation: purelane-shaft-sway 19s ease-in-out infinite;
-}
-
-.purelane-scenes .wl-s {
-  mix-blend-mode: overlay;
-  opacity: 0.72;
-  animation: purelane-surface 11s ease-in-out infinite;
-  transform-origin: 50% 0;
-}
-
-@keyframes purelane-drift-a {
-  0% { transform: translate3d(-3%, 0, 0) scale(1.06); }
-  50% { transform: translate3d(3%, -1.6%, 0) scale(1.13); }
-  100% { transform: translate3d(-3%, 0, 0) scale(1.06); }
-}
-
-@keyframes purelane-drift-b {
-  0% { transform: translate3d(4%, 1%, 0) scale(1.1); }
-  50% { transform: translate3d(-4%, -1%, 0) scale(1.04); }
-  100% { transform: translate3d(4%, 1%, 0) scale(1.1); }
-}
-
-@keyframes purelane-shaft-sway {
-  0% { transform: translate3d(-2%, 0, 0) skewX(0deg); opacity: 0.34; }
-  50% { transform: translate3d(2%, 0, 0) skewX(2.4deg); opacity: 0.6; }
-  100% { transform: translate3d(-2%, 0, 0) skewX(0deg); opacity: 0.34; }
-}
-
-@keyframes purelane-surface {
-  0% { transform: translateY(0) scaleY(1); opacity: 0.55; }
-  50% { transform: translateY(-1.4%) scaleY(1.14); opacity: 0.82; }
-  100% { transform: translateY(0) scaleY(1); opacity: 0.55; }
-}
-
-/* depth response */
-.purelane-scenes[data-d="1"] .water { opacity: 1; }
-.purelane-scenes[data-d="2"] .water { opacity: 0.9; }
-.purelane-scenes[data-d="3"] .water { opacity: 0.76; }
-.purelane-scenes[data-d="4"] .water { opacity: 0.58; }
-
-.purelane-scenes[data-d="1"] .wl-s { opacity: 0.72; }
-.purelane-scenes[data-d="2"] .wl-s,
-.purelane-scenes[data-d="3"] .wl-s,
-.purelane-scenes[data-d="4"] .wl-s { opacity: 0; }
-
-/* ---------- bubbles ---------- */
-
-.purelane-scenes .bub {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-}
-
-.purelane-scenes .bub span {
-  position: absolute;
-  bottom: -6%;
-  left: var(--x);
-  width: var(--s);
-  height: var(--s);
-  border-radius: 50%;
-  border: 1px solid rgba(75, 58, 143, 0.26);
-  background: radial-gradient(circle at 34% 30%, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0) 64%);
-  animation: purelane-rise var(--dur) linear infinite;
-  animation-delay: var(--dly);
-  opacity: 0;
-}
-
-@keyframes purelane-rise {
-  0% { transform: translate3d(0, 0, 0); opacity: 0; }
-  12% { opacity: 0.7; }
-  88% { opacity: 0.5; }
-  100% { transform: translate3d(var(--drift), -116vh, 0); opacity: 0; }
-}
-
-/* ---------- vignette ---------- */
-
-.purelane-scenes .vig {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background:
-    radial-gradient(126% 88% at 50% 26%, transparent 42%, rgba(75, 58, 143, 0.07) 80%, rgba(0, 80, 74, 0.16) 100%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.4) 0%, transparent 20%, transparent 70%, rgba(0, 84, 78, 0.1) 100%);
-}
-
-/* ---------- cost control ----------
-   soft-light / overlay blending across four full-viewport layers is the single
-   most expensive thing on this page. Below 760px the second caustic layer and
-   the bubbles come off, exactly as the prototype did — the remaining layers
-   still read as water on a small screen, and the paint cost roughly halves. */
-
-@media (max-width: 760px) {
-  .purelane-scenes .wl-b,
-  .purelane-scenes .bub {
-    display: none;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .purelane-scenes .wl-a,
-  .purelane-scenes .wl-b,
-  .purelane-scenes .wl-c,
-  .purelane-scenes .wl-s,
-  .purelane-scenes .bub span {
-    animation: none;
+@layer purelane-section {
+  .purelane-scenes {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+    background: #eee7fb;
   }
 
   .purelane-scenes .scene {
-    transition: none;
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 1.5s ease;
+  }
+
+  .purelane-scenes .scene.on { opacity: 1; }
+
+  .purelane-scenes .s1 { background: linear-gradient(178deg, #fbfffb 0%, #eafaec 24%, #d6f1dc 54%, #bfe8ca 100%); }
+  .purelane-scenes .s2 { background: linear-gradient(178deg, #f6fdf7 0%, #e3f7e7 26%, #cbedd4 58%, #b2e2c2 100%); }
+  .purelane-scenes .s3 { background: linear-gradient(178deg, #f0fbf2 0%, #d9f2df 28%, #bde6c8 60%, #a2d9b6 100%); }
+  .purelane-scenes .s4 { background: linear-gradient(178deg, #e9f8ec 0%, #cdedd6 30%, #addcbe 62%, #8ecdaa 100%); }
+
+  /* ---------- caustics ---------- */
+
+  .purelane-scenes .water {
+    position: absolute;
+    inset: -14% -10%;
+    pointer-events: none;
+    transition: opacity 1.2s ease;
+  }
+
+  .purelane-scenes .wl {
+    position: absolute;
+    inset: 0;
+    will-change: transform;
+    translate: var(--px, 0) var(--py, 0);
+  }
+
+  .purelane-scenes .wl .sv { width: 100%; height: 100%; }
+
+  .purelane-scenes .wl-a {
+    mix-blend-mode: soft-light;
+    opacity: 1;
+    animation: purelane-drift-a 34s linear infinite;
+  }
+
+  .purelane-scenes .wl-a .sv { filter: contrast(1.25); }
+
+  .purelane-scenes .wl-b {
+    mix-blend-mode: overlay;
+    opacity: 0.66;
+    animation: purelane-drift-b 23s linear infinite;
+  }
+
+  .purelane-scenes .wl-c {
+    mix-blend-mode: overlay;
+    opacity: 0.6;
+    animation: purelane-shaft-sway 19s ease-in-out infinite;
+  }
+
+  .purelane-scenes .wl-s {
+    mix-blend-mode: overlay;
+    opacity: 0.72;
+    animation: purelane-surface 11s ease-in-out infinite;
+    transform-origin: 50% 0;
+  }
+
+  @keyframes purelane-drift-a {
+    0% { transform: translate3d(-3%, 0, 0) scale(1.06); }
+    50% { transform: translate3d(3%, -1.6%, 0) scale(1.13); }
+    100% { transform: translate3d(-3%, 0, 0) scale(1.06); }
+  }
+
+  @keyframes purelane-drift-b {
+    0% { transform: translate3d(4%, 1%, 0) scale(1.1); }
+    50% { transform: translate3d(-4%, -1%, 0) scale(1.04); }
+    100% { transform: translate3d(4%, 1%, 0) scale(1.1); }
+  }
+
+  @keyframes purelane-shaft-sway {
+    0% { transform: translate3d(-2%, 0, 0) skewX(0deg); opacity: 0.34; }
+    50% { transform: translate3d(2%, 0, 0) skewX(2.4deg); opacity: 0.6; }
+    100% { transform: translate3d(-2%, 0, 0) skewX(0deg); opacity: 0.34; }
+  }
+
+  @keyframes purelane-surface {
+    0% { transform: translateY(0) scaleY(1); opacity: 0.55; }
+    50% { transform: translateY(-1.4%) scaleY(1.14); opacity: 0.82; }
+    100% { transform: translateY(0) scaleY(1); opacity: 0.55; }
+  }
+
+  /* depth response */
+  .purelane-scenes[data-d="1"] .water { opacity: 1; }
+  .purelane-scenes[data-d="2"] .water { opacity: 0.9; }
+  .purelane-scenes[data-d="3"] .water { opacity: 0.76; }
+  .purelane-scenes[data-d="4"] .water { opacity: 0.58; }
+
+  .purelane-scenes[data-d="1"] .wl-s { opacity: 0.72; }
+  .purelane-scenes[data-d="2"] .wl-s,
+  .purelane-scenes[data-d="3"] .wl-s,
+  .purelane-scenes[data-d="4"] .wl-s { opacity: 0; }
+
+  /* ---------- bubbles ---------- */
+
+  .purelane-scenes .bub {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+  }
+
+  .purelane-scenes .bub span {
+    position: absolute;
+    bottom: -6%;
+    left: var(--x);
+    width: var(--s);
+    height: var(--s);
+    border-radius: 50%;
+    border: 1px solid rgba(75, 58, 143, 0.26);
+    background: radial-gradient(circle at 34% 30%, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0) 64%);
+    animation: purelane-rise var(--dur) linear infinite;
+    animation-delay: var(--dly);
+    opacity: 0;
+  }
+
+  @keyframes purelane-rise {
+    0% { transform: translate3d(0, 0, 0); opacity: 0; }
+    12% { opacity: 0.7; }
+    88% { opacity: 0.5; }
+    100% { transform: translate3d(var(--drift), -116vh, 0); opacity: 0; }
+  }
+
+  /* ---------- vignette ---------- */
+
+  .purelane-scenes .vig {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(126% 88% at 50% 26%, transparent 42%, rgba(75, 58, 143, 0.07) 80%, rgba(0, 80, 74, 0.16) 100%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.4) 0%, transparent 20%, transparent 70%, rgba(0, 84, 78, 0.1) 100%);
+  }
+
+  /* ---------- cost control ----------
+     soft-light / overlay blending across four full-viewport layers is the single
+     most expensive thing on this page. Below 760px the second caustic layer and
+     the bubbles come off, exactly as the prototype did — the remaining layers
+     still read as water on a small screen, and the paint cost roughly halves. */
+
+  @media (max-width: 760px) {
+    .purelane-scenes .wl-b,
+    .purelane-scenes .bub {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .purelane-scenes .wl-a,
+    .purelane-scenes .wl-b,
+    .purelane-scenes .wl-c,
+    .purelane-scenes .wl-s,
+    .purelane-scenes .bub span {
+      animation: none;
+    }
+
+    .purelane-scenes .scene {
+      transition: none;
+    }
   }
 }
