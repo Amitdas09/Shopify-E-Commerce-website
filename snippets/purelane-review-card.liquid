@@ -1,0 +1,61 @@
+{%- comment -%}
+  One review card in the marquee.
+
+  Metaobject fields are read through `.value` throughout. Accessing them bare
+  happens to render correctly for simple text, but returns a metafield drop —
+  which is never blank — so `| default:` fallbacks silently never fire.
+
+  Params:
+    review     - purelane_review metaobject entry
+    decorative - true for the duplicated pass that only exists so the marquee
+                 loops without a visible gap. Hidden from assistive tech.
+{%- endcomment -%}
+
+{%- liquid
+  assign r = review
+
+  assign stars = r.rating.value | default: 5 | round
+  if stars < 1 or stars > 5
+    assign stars = 5
+  endif
+
+  assign title = r.title.value
+  assign body = r.body.value
+  assign author = r.author.value | default: 'Verified buyer'
+  assign verified = r.verified.value
+  assign linked = r.product.value
+  assign context = r.context.value | default: linked.title
+-%}
+
+<article class="glass-2 rcard" {% if decorative %}aria-hidden="true"{% endif %}>
+  <span class="p-stars" aria-hidden="true">
+    {%- for i in (1..5) -%}{% if i <= stars %}★{% else %}☆{% endif %}{%- endfor -%}
+  </span>
+
+  {%- unless decorative -%}
+    <span class="visually-hidden">Rated {{ stars }} out of 5.</span>
+  {%- endunless -%}
+
+  {%- if title != blank -%}
+    <p class="rcard-title">{{ title }}</p>
+  {%- endif -%}
+
+  {%- if body != blank -%}
+    <p>{{ body }}</p>
+  {%- endif -%}
+
+  <footer class="who">
+    {%- if verified -%}
+      {%- render 'purelane-icon', icon: 'check-bold' -%}
+      {%- unless decorative -%}
+        <span class="visually-hidden">Verified buyer.</span>
+      {%- endunless -%}
+    {%- endif -%}
+
+    <b>{{ author }}</b>
+
+    {%- if context != blank -%}
+      <span>· {{ context }}</span>
+    {%- endif -%}
+  </footer>
+</article>

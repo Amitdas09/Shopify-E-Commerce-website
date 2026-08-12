@@ -1,0 +1,162 @@
+/* ==========================================================================
+   Purelane — reviews marquee
+   ========================================================================== */
+
+.purelane .revhead {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px 18px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.purelane .revhead .agg {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--paper-2);
+}
+
+/* 16px/700 is below the 18.66px bold threshold for WCAG "large text", so this
+   number needs the full 4.5:1 and takes the text-safe accent. */
+.purelane .revhead .agg b {
+  font-family: var(--purelane-display-font, 'Outfit', sans-serif);
+  font-size: 16px;
+  color: var(--accent-ink);
+  letter-spacing: 0;
+}
+
+.purelane .revhead .p-stars {
+  font-size: 12px;
+  letter-spacing: 0.16em;
+}
+
+/* ---------- rail ---------- */
+
+.purelane .revrail {
+  overflow: hidden;
+  position: relative;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+}
+
+.purelane .revtrack {
+  display: flex;
+  gap: 12px;
+  width: max-content;
+  animation: purelane-marq 52s linear infinite;
+}
+
+.purelane .revrail:hover .revtrack,
+.purelane .revrail:focus-within .revtrack,
+.purelane .revrail[data-paused="true"] .revtrack {
+  animation-play-state: paused;
+}
+
+@keyframes purelane-marq {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-50%, 0, 0); }
+}
+
+.purelane .rcard {
+  flex: 0 0 auto;
+  width: 284px;
+  padding: 15px 17px;
+  border-radius: 18px;
+}
+
+.purelane .rcard .p-stars {
+  font-size: 10.5px;
+  letter-spacing: 0.2em;
+  margin-bottom: 9px;
+  display: block;
+}
+
+.purelane .rcard .rcard-title {
+  font-family: var(--purelane-display-font, 'Outfit', sans-serif);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--surface);
+  margin: 0 0 7px;
+}
+
+.purelane .rcard p {
+  font-size: 12.6px;
+  color: var(--paper-2);
+  line-height: 1.52;
+  margin: 0 0 11px;
+}
+
+.purelane .rcard .who {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--paper-3);
+  font-style: normal;
+}
+
+.purelane .rcard .who b { color: var(--btn-ghost-ink); font-weight: 700; }
+
+.purelane .rcard .who svg {
+  width: 12px;
+  height: 12px;
+  color: var(--leaf);
+  flex: 0 0 auto;
+}
+
+/* ---------- pause control ---------- */
+
+.purelane .revpause {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 30px;
+  padding: 0 13px;
+  border-radius: 999px;
+  border: 1px solid rgba(75, 58, 143, 0.22);
+  background: rgba(255, 255, 255, 0.66);
+  color: var(--btn-ghost-ink);
+  font-family: inherit;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.purelane .revpause svg { width: 12px; height: 12px; }
+
+@media (max-width: 760px) {
+  .purelane .rcard { width: 250px; padding: 13px 14px; }
+  .purelane .revtrack { animation-duration: 40s; }
+}
+
+/* The shared reduced-motion rule collapses every animation to 0.01ms. For a
+   marquee that means it *completes* instantly and parks at translate(-50%),
+   leaving the right half of the rail empty. It has to be switched off, not
+   sped up — and then the rail becomes a normal horizontal scroller. */
+@media (prefers-reduced-motion: reduce) {
+  .purelane .revtrack {
+    animation: none !important;
+    transform: none !important;
+  }
+
+  .purelane .revrail {
+    overflow-x: auto;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+
+  .purelane .revpause { display: none; }
+}

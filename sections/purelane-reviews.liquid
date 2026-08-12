@@ -1,0 +1,124 @@
+{%- comment -%}
+  Purelane — Reviews rail  (prototype: #reviews)
+
+  Reviews live in a `purelane_review` metaobject so the marketing team can add
+  one without touching Liquid, and so each quote can point at the product it is
+  about. Definition is in docs/metaobjects.md.
+
+  The marquee needs its content twice to loop seamlessly. The prototype pasted
+  the five reviews out a second time by hand, which meant a screen reader
+  announced every quote twice and the DOM carried duplicate ids. Here the
+  second pass is generated and marked aria-hidden, so it is decoration only.
+{%- endcomment -%}
+
+{%- render 'purelane-assets' -%}
+{{ 'purelane-reviews.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign anchor = section.settings.anchor_id | default: 'reviews' | handle
+  assign reviews = section.settings.reviews
+  assign count = reviews.size | default: 0
+-%}
+
+<div
+  class="purelane purelane-section purelane-reviews"
+  id="{{ anchor }}"
+  data-purelane-scene="{{ section.settings.scene_depth }}"
+  style="--pl-pt:{{ section.settings.padding_top }}px; --pl-pb:{{ section.settings.padding_bottom }}px;"
+>
+  <div class="wrap">
+    <div class="revhead rv" data-purelane-reveal>
+      {%- if section.settings.kicker != blank -%}
+        <span class="kicker">{{ section.settings.kicker }}</span>
+      {%- endif -%}
+
+      {%- if section.settings.average_rating != blank -%}
+        <span class="agg">
+          <span class="p-stars" aria-hidden="true">★★★★★</span>
+          <b>{{ section.settings.average_rating }}</b>
+          <span>{{ section.settings.rating_caption }}</span>
+        </span>
+      {%- endif -%}
+
+      {%- if section.settings.reach_number != blank -%}
+        <span class="agg">
+          {{ section.settings.reach_prefix }}
+          <b>{{ section.settings.reach_number }}</b>
+          {{ section.settings.reach_suffix }}
+        </span>
+      {%- endif -%}
+
+      {%- if count > 1 -%}
+        <button type="button" class="revpause" data-purelane-marquee-toggle>
+          {%- render 'purelane-icon', icon: 'pause' -%}
+          <span data-label>Pause</span>
+          <span class="visually-hidden">the scrolling reviews</span>
+        </button>
+      {%- endif -%}
+    </div>
+  </div>
+
+  {%- if count > 0 -%}
+    <div
+      class="revrail rv"
+      data-purelane-reveal
+      data-purelane-marquee
+      role="region"
+      aria-label="{{ section.settings.rail_label | default: 'Customer reviews' | escape }}"
+      tabindex="0"
+    >
+      <div class="revtrack">
+        {%- comment -%} Pass 1: the real, announced content. {%- endcomment -%}
+        {%- for review in reviews -%}
+          {%- render 'purelane-review-card', review: review -%}
+        {%- endfor -%}
+
+        {%- comment -%} Pass 2: visual filler so the loop has no gap. {%- endcomment -%}
+        {%- for review in reviews -%}
+          {%- render 'purelane-review-card', review: review, decorative: true -%}
+        {%- endfor -%}
+      </div>
+    </div>
+  {%- elsif request.design_mode -%}
+    <div class="wrap">
+      <p class="shelf-empty">
+        No reviews selected yet. Create some <code>purelane_review</code> entries in Content → Metaobjects, then pick them here.
+      </p>
+    </div>
+  {%- endif -%}
+</div>
+
+<script src="{{ 'purelane-marquee.js' | asset_url }}" defer></script>
+
+{% schema %}
+{
+  "name": "Purelane reviews",
+  "tag": "section",
+  "class": "purelane-shell",
+  "settings": [
+    { "type": "header", "content": "Header" },
+    { "type": "text", "id": "kicker", "label": "Kicker", "default": "That's what they said" },
+    { "type": "text", "id": "average_rating", "label": "Average rating", "default": "4.8" },
+    { "type": "text", "id": "rating_caption", "label": "Rating caption", "default": "from 8,000+ reviews" },
+    { "type": "text", "id": "reach_prefix", "label": "Reach prefix", "default": "Loved by" },
+    { "type": "text", "id": "reach_number", "label": "Reach number", "default": "12 lakh+" },
+    { "type": "text", "id": "reach_suffix", "label": "Reach suffix", "default": "homes" },
+    { "type": "header", "content": "Reviews" },
+    {
+      "type": "metaobject_list",
+      "id": "reviews",
+      "metaobject_type": "purelane_review",
+      "label": "Reviews",
+      "limit": 24,
+      "info": "Add or edit entries under Content → Metaobjects → Purelane review."
+    },
+    { "type": "text", "id": "rail_label", "label": "Rail label for screen readers", "default": "Customer reviews" },
+    { "type": "header", "content": "Layout" },
+    { "type": "text", "id": "anchor_id", "label": "Anchor ID", "default": "reviews" },
+    { "type": "range", "id": "scene_depth", "label": "Background depth", "min": 1, "max": 4, "step": 1, "default": 1 },
+    { "type": "range", "id": "padding_top", "label": "Top padding", "min": 0, "max": 100, "step": 2, "unit": "px", "default": 34 },
+    { "type": "range", "id": "padding_bottom", "label": "Bottom padding", "min": 0, "max": 100, "step": 2, "unit": "px", "default": 34 }
+  ],
+  "presets": [{ "name": "Purelane reviews" }]
+}
+{% endschema %}
