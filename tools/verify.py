@@ -197,7 +197,11 @@ else:
         ok("%d products, all rows well formed" % len(rows))
 
     sold_out = [r for r in rows if r["Variant Inventory Qty"] == "0"]
-    no_image = [r for r in rows if not r["Image Alt Text"].strip()]
+    # Shopify rejects Image Alt Text without Image Src, so the column must not
+    # come back. This is the check that stops it.
+    if any("Image Alt Text" in r for r in rows):
+        fail("seed CSV has an Image Alt Text column; Shopify will reject the import")
+    no_image = [r for r in rows if "no-image" in r["Tags"]]
     long_title = [r for r in rows if len(r["Title"]) > 90]
 
     (ok if sold_out else fail)("sold-out product present (%d)" % len(sold_out))

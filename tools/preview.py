@@ -181,13 +181,13 @@ def load_products():
             compare = row["Variant Compare At Price"]
             compare = int(float(compare) * 100) if compare else 0
             qty = int(row["Variant Inventory Qty"] or 0)
-            has_image = bool(row["Image Alt Text"].strip())
 
+            # Whether art exists on disk is the real signal. The CSV cannot carry
+            # alt text: Shopify rejects an Image Alt Text column with no
+            # Image Src to pair it with, and these images are uploaded by hand.
             image = None
-            if has_image:
-                rel = "../seed-images/%s.png" % handle
-                if os.path.exists(os.path.join(ROOT, "tools", "seed-images", handle + ".png")):
-                    image = {"src": rel, "alt": row["Image Alt Text"]}
+            if os.path.exists(os.path.join(ROOT, "tools", "seed-images", handle + ".png")):
+                image = {"src": "../seed-images/%s.png" % handle, "alt": row["Title"]}
 
             products[handle] = {
                 "id": handle,
