@@ -56,7 +56,7 @@
   {%- render 'purelane-price', product: p -%}
 
   {%- if p.available -%}
-    {%- form 'product', p, id: null, class: 'card-form', novalidate: 'novalidate' -%}
+    {%- form 'product', p, class: 'card-form', novalidate: 'novalidate' -%}
       <input type="hidden" name="id" value="{{ variant.id }}">
       <input type="hidden" name="quantity" value="1">
       <button type="submit" class="btn btn-ghost btn-sm" name="add">
