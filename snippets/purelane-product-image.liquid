@@ -1,0 +1,81 @@
+{%- comment -%}
+  Purelane product image.
+
+  The prototype hardcoded 14 base64 SVG bottles into CSS custom properties and
+  painted them as background-image. Three problems that mattered in production:
+    1. background-image is invisible to the preload scanner, so the hero visual
+       could never be the discovered-early LCP element.
+    2. Nothing was merchant-editable — a new product meant a new CSS variable.
+    3. No intrinsic size, so every card shifted as art loaded (CLS).
+
+  This renders the real Shopify image as an <img> with srcset and explicit
+  width/height. When a product has no image — a required seed case — it falls
+  back to a branded bottle silhouette that keeps the same aspect ratio, so the
+  grid never collapses.
+
+  Params:
+    product   - product object (required unless image given)
+    image     - explicit image object (optional, wins over product)
+    sizes     - sizes attribute (default '(min-width: 860px) 260px, 45vw')
+    priority  - true to eager-load + fetchpriority=high (hero only)
+    class     - extra classes applied to the img / placeholder
+    alt       - alt override; defaults to product title
+{%- endcomment -%}
+
+{%- liquid
+  assign img = image | default: product.featured_image
+  assign alt_text = alt | default: img.alt | default: product.title
+  assign img_sizes = sizes | default: '(min-width: 860px) 260px, 45vw'
+
+  assign loading_attr = 'lazy'
+  assign priority_attr = 'auto'
+  if priority
+    assign loading_attr = 'eager'
+    assign priority_attr = 'high'
+  endif
+
+  assign img_class = 'pl-pimg'
+  if class != blank
+    assign img_class = img_class | append: ' ' | append: class
+  endif
+-%}
+
+{%- if img != blank -%}
+  {{
+    img
+    | image_url: width: 800
+    | image_tag:
+      loading: loading_attr,
+      fetchpriority: priority_attr,
+      decoding: 'async',
+      widths: '120, 180, 240, 320, 420, 560, 800',
+      sizes: img_sizes,
+      alt: alt_text,
+      class: img_class
+  }}
+{%- else -%}
+  {%- comment -%}
+    No-image fallback. Keeps the 0.639 bottle aspect ratio the real shots use, so
+    a product without art occupies exactly the same box as one with art.
+  {%- endcomment -%}
+  {%- assign uid = product.id | default: section.id | default: 'x' -%}
+  <span
+    class="{{ img_class }} pl-pimg--empty"
+    role="img"
+    aria-label="{{ alt_text | escape }} — product photo coming soon"
+  >
+    <svg viewBox="0 0 380 595" aria-hidden="true" focusable="false">
+      <defs>
+        <linearGradient id="pl-empty-{{ uid }}" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#6b55b8" stop-opacity=".38"/>
+          <stop offset="1" stop-color="#6b55b8" stop-opacity=".18"/>
+        </linearGradient>
+      </defs>
+      <rect x="149.9" y="0" width="80.1" height="59.5" rx="17.6" fill="#6b55b8" opacity=".3"/>
+      <rect x="161.2" y="53.6" width="57.7" height="41.7" fill="#6b55b8" opacity=".24"/>
+      <rect x="72.2" y="119" width="235.6" height="476" rx="37.7" fill="url(#pl-empty-{{ uid }})"/>
+      <rect x="100.5" y="261.8" width="179.1" height="161.8" rx="11.8" fill="#faf7fd" opacity=".7"/>
+      <path d="M190 316c0 22-12 37-27 42 0-22 12-37 27-42Zm0 0c0 22 12 37 27 42 0-22-12-37-27-42Z" fill="#6b55b8" opacity=".34"/>
+    </svg>
+  </span>
+{%- endif -%}

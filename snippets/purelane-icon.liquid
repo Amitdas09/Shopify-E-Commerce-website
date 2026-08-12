@@ -1,0 +1,62 @@
+{%- comment -%}
+  Purelane icon set.
+
+  The prototype repeated the same five inline SVGs 40+ times, which is ~9KB of
+  duplicated markup on the homepage. One snippet, one definition each.
+
+  Usage: {% render 'purelane-icon', icon: 'leaf' %}
+
+  Params:
+    icon   - leaf | shield | no-chem | arrow | check | truck | swipe | pause | play
+    width  - optional px override (default inherits from CSS)
+    class  - optional extra class
+
+  All icons are decorative by default (aria-hidden). Any meaning they carry
+  must live in adjacent text, which is how every caller uses them.
+{%- endcomment -%}
+
+{%- liquid
+  assign sw = 1.6
+  case icon
+    when 'arrow'
+      assign sw = 2.2
+    when 'check'
+      assign sw = 2.4
+    when 'check-bold'
+      assign sw = 3
+  endcase
+-%}
+
+<svg
+  class="pl-icon {{ class }}"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="{{ sw }}"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+  focusable="false"
+  {% if width %}width="{{ width }}" height="{{ width }}"{% endif %}
+>
+  {%- case icon -%}
+    {%- when 'leaf' -%}
+      <path d="M12 21c0-6.5 3.5-11 8-12.5C20 15 16.5 20 12 21Z"/><path d="M12 21C12 14.5 8.5 10 4 8.5 4 15 7.5 20 12 21Z"/>
+    {%- when 'shield' -%}
+      <path d="M12 3 4.5 6v6.2c0 4.3 3.1 7.6 7.5 8.8 4.4-1.2 7.5-4.5 7.5-8.8V6L12 3Z"/><path d="m9 12 2.2 2.2L15.4 10"/>
+    {%- when 'no-chem' -%}
+      <circle cx="12" cy="12" r="8.4"/><path d="M6.4 17.6 17.6 6.4"/>
+    {%- when 'arrow' -%}
+      <path d="M5 12h13m-5-6 6 6-6 6"/>
+    {%- when 'check' or 'check-bold' -%}
+      <path d="m5 13 4 4L19 7"/>
+    {%- when 'truck' -%}
+      <path d="M3 7h11v9H3zM14 10h4l3 3v3h-7z"/><circle cx="7" cy="18" r="1.8"/><circle cx="17.5" cy="18" r="1.8"/>
+    {%- when 'swipe' -%}
+      <path d="M5 12h13m-5-6 6 6-6 6"/>
+    {%- when 'pause' -%}
+      <path d="M9 5v14M15 5v14"/>
+    {%- when 'play' -%}
+      <path d="M7 4.5 19 12 7 19.5Z"/>
+  {%- endcase -%}
+</svg>

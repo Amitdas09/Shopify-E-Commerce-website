@@ -1,0 +1,54 @@
+{%- comment -%}
+  Purelane rating.
+
+  Reads Shopify's standard product rating metafields, so any review app that
+  writes to the standard definitions (Shopify Product Reviews, Judge.me,
+  Okendo, Loox, Yotpo) populates this with no theme change:
+      product.metafields.reviews.rating        (type: rating)
+      product.metafields.reviews.rating_count  (type: number_integer)
+
+  Accessibility: the prototype printed "★★★★★" as literal glyphs, which a
+  screen reader announces as "black star black star black star…". The stars are
+  now aria-hidden decoration with a real sentence beside them.
+
+  Params:
+    product  - product object (required)
+    style    - 'compact' (default, "★ 4.8 · 237 reviews") or 'stars'
+    fallback - true renders nothing when there are no reviews (default true)
+{%- endcomment -%}
+
+{%- liquid
+  assign rating = product.metafields.reviews.rating.value
+  assign count = product.metafields.reviews.rating_count.value | default: 0
+
+  assign has_rating = false
+  if rating != blank and count > 0
+    assign has_rating = true
+  endif
+-%}
+
+{%- if has_rating -%}
+  {%- liquid
+    assign score = rating.rating | times: 1.0
+    assign scale = rating.scale_max | default: 5
+    assign filled = score | round
+    assign shown = score | round: 1
+  -%}
+
+  <div class="p-rating {{ class }}">
+    {%- if style == 'stars' -%}
+      <span class="p-stars" aria-hidden="true">
+        {%- for i in (1..scale) -%}{% if i <= filled %}★{% else %}☆{% endif %}{%- endfor -%}
+      </span>
+    {%- else -%}
+      <b aria-hidden="true">★ {{ shown }}</b>
+    {%- endif -%}
+
+    <span aria-hidden="true">·</span>
+    <span aria-hidden="true">{{ count }} {{ count | pluralize: 'review', 'reviews' }}</span>
+
+    <span class="visually-hidden">
+      Rated {{ shown }} out of {{ scale }} from {{ count }} {{ count | pluralize: 'review', 'reviews' }}.
+    </span>
+  </div>
+{%- endif -%}

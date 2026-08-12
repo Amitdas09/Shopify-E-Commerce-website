@@ -1,0 +1,55 @@
+{%- comment -%}
+  Purelane price block.
+
+  The prototype hardcoded "₹200 / ₹299 / 33% off" into every card. Here the
+  money comes from the platform: price, compare_at_price and the derived
+  discount, all through the `money` filter so the merchant's currency and
+  format settings apply.
+
+  Params:
+    product      - product object (required)
+    show_saving  - true renders the "33% off" chip (default true)
+    saving_style - 'percent' (default) or 'amount'
+    class        - extra classes
+{%- endcomment -%}
+
+{%- liquid
+  assign p = product
+  assign price = p.price
+  assign compare = p.compare_at_price
+  assign show_sv = show_saving
+  if show_saving == nil
+    assign show_sv = true
+  endif
+
+  assign on_sale = false
+  if compare > price and compare > 0
+    assign on_sale = true
+  endif
+-%}
+
+<div class="p-price {{ class }}">
+  {%- if p.price_varies -%}
+    <strong>
+      <span class="visually-hidden">From </span>{{ price | money }}
+    </strong>
+  {%- else -%}
+    <strong>{{ price | money }}</strong>
+  {%- endif -%}
+
+  {%- if on_sale -%}
+    <s>
+      <span class="visually-hidden">Regular price </span>{{ compare | money }}
+    </s>
+
+    {%- if show_sv -%}
+      {%- if saving_style == 'amount' -%}
+        {%- assign saved = compare | minus: price -%}
+        <em>Save {{ saved | money }}</em>
+      {%- else -%}
+        {%- assign pct = compare | minus: price | times: 100.0 | divided_by: compare | round -%}
+        <em>{{ pct }}% off</em>
+      {%- endif -%}
+    {%- endif -%}
+  {%- endif -%}
+</div>
