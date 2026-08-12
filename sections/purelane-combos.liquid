@@ -1,0 +1,249 @@
+{%- comment -%}
+  Purelane — Best-selling combos  (prototype: #combos)
+
+  A combo is a real Shopify product, not a content block. That is the whole
+  point: it has a real price, a real compare-at, real inventory and a real
+  add-to-cart, so the "You save ₹398" chip cannot drift away from what the
+  customer is actually charged.
+
+  Metafields it reads (all optional, all documented in docs/metafields.md):
+    purelane.combo_items  list.product_reference  what the tray shows
+    purelane.flag         single_line_text        corner ribbon, e.g. "Most popular"
+    purelane.save_label   single_line_text        overrides "You save ₹X"
+    purelane.highlight    boolean                 the gold-bordered hero card
+    purelane.includes     multi_line_text         the "Includes:" sentence
+  and on each component product:
+    purelane.benefit      single_line_text        the caption under its bottle
+{%- endcomment -%}
+
+{%- render 'purelane-assets' -%}
+{{ 'purelane-combos.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign anchor = section.settings.anchor_id | default: 'combos' | handle
+
+  if section.settings.source == 'picked'
+    assign combos = section.settings.products
+  else
+    assign combos = section.settings.collection.products
+  endif
+-%}
+
+<div
+  class="purelane purelane-section purelane-combos"
+  id="{{ anchor }}"
+  data-purelane-scene="{{ section.settings.scene_depth }}"
+  style="--pl-pt:{{ section.settings.padding_top }}px; --pl-pb:{{ section.settings.padding_bottom }}px;"
+>
+  <div class="wrap">
+    {%- if section.settings.kicker != blank or section.settings.heading != blank or section.settings.subheading != blank -%}
+      <div class="panel-head rv" data-purelane-reveal>
+        {%- if section.settings.kicker != blank -%}
+          <span class="kicker">{{ section.settings.kicker }}</span>
+        {%- endif -%}
+        {%- if section.settings.heading != blank -%}
+          <h2 class="d2">{{ section.settings.heading }}</h2>
+        {%- endif -%}
+        {%- if section.settings.show_rule -%}
+          <div class="rule"><i></i>{%- render 'purelane-icon', icon: 'leaf' -%}<i></i></div>
+        {%- endif -%}
+        {%- if section.settings.subheading != blank -%}
+          <p class="lede">{{ section.settings.subheading }}</p>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+    {%- if combos.size > 0 -%}
+      {%- comment -%}
+        tabindex + role make the overflow rail operable from the keyboard. A
+        horizontally scrolling div is unreachable without it, which fails
+        WCAG 2.1.1 for every non-mouse visitor.
+      {%- endcomment -%}
+      <div
+        class="comborail rv"
+        data-purelane-reveal
+        role="region"
+        aria-label="{{ section.settings.heading | default: 'Best selling combos' | escape }}, scrollable"
+        tabindex="0"
+      >
+        {%- for combo in combos limit: section.settings.combos_to_show -%}
+          {%- liquid
+            assign items = combo.metafields.purelane.combo_items.value
+            assign item_count = items.size | default: 0
+            assign flag = combo.metafields.purelane.flag.value
+            assign highlight = combo.metafields.purelane.highlight.value
+            assign includes = combo.metafields.purelane.includes.value
+
+            assign saved = 0
+            if combo.compare_at_price > combo.price
+              assign saved = combo.compare_at_price | minus: combo.price
+            endif
+
+            assign save_label = combo.metafields.purelane.save_label.value
+            if save_label == blank and saved > 0
+              assign save_label = saved | money | prepend: 'You save '
+            endif
+          -%}
+
+          <article class="glass combo{% if highlight %} hero-combo{% endif %}">
+            <div class="tray">
+              {%- if save_label != blank -%}
+                <span class="save">{{ save_label }}</span>
+              {%- endif -%}
+              {%- if flag != blank -%}
+                <span class="flag">{{ flag }}</span>
+              {%- endif -%}
+
+              {%- if item_count > 0 -%}
+                <div class="stack">
+                  {%- for item in items limit: 3 -%}
+                    {%- unless forloop.first -%}
+                      <span class="plus" aria-hidden="true">+</span>
+                    {%- endunless -%}
+                    <span class="it">
+                      {%- if item.featured_image != blank -%}
+                        {%- render 'purelane-product-image',
+                          product: item,
+                          sizes: '66px',
+                          alt: item.title -%}
+                      {%- else -%}
+                        <span class="tile" role="img" aria-label="{{ item.title | escape }}">
+                          {%- render 'purelane-icon', icon: 'leaf' -%}
+                        </span>
+                      {%- endif -%}
+                      <span>{{ item.metafields.purelane.benefit.value | default: item.title }}</span>
+                    </span>
+                  {%- endfor -%}
+                </div>
+              {%- endif -%}
+            </div>
+
+            <div class="body">
+              <h3 class="combo-title">
+                <a href="{{ combo.url }}">{{ combo.title }}</a>
+              </h3>
+
+              {%- if item_count > 0 -%}
+                <div class="cnt">{{ item_count }} {{ item_count | pluralize: 'product', 'products' }}</div>
+              {%- endif -%}
+
+              {%- if includes != blank -%}
+                <p class="inc">{{ includes }}</p>
+              {%- elsif item_count > 0 -%}
+                {%- comment -%}
+                  No hand-written copy? Build the sentence from the real items so
+                  the card is never half-empty while a merchant catches up.
+                {%- endcomment -%}
+                <p class="inc">
+                  Includes:
+                  {%- for item in items -%}
+                    {{ item.title }}{% unless forloop.last %},{% endunless %}
+                  {%- endfor -%}.
+                </p>
+              {%- endif -%}
+
+              {%- render 'purelane-price', product: combo, saving_style: 'amount' -%}
+
+              {%- if section.settings.fine_print != blank -%}
+                <div class="fine">{{ section.settings.fine_print }}</div>
+              {%- endif -%}
+
+              <a
+                class="btn {% if highlight %}btn-primary{% else %}btn-ghost{% endif %}"
+                href="{{ combo.url }}"
+              >
+                {{ section.settings.button_label | default: 'Shop bundle' }}
+                <span class="visually-hidden">— {{ combo.title }}</span>
+                {%- render 'purelane-icon', icon: 'arrow' -%}
+              </a>
+            </div>
+          </article>
+        {%- endfor -%}
+      </div>
+
+      {%- if section.settings.swipe_cue != blank -%}
+        <div class="swipecue" aria-hidden="true">
+          {%- render 'purelane-icon', icon: 'swipe' -%}{{ section.settings.swipe_cue }}
+        </div>
+      {%- endif -%}
+
+      {%- if section.settings.rail_note != blank -%}
+        <p class="railnote">{{ section.settings.rail_note }}</p>
+      {%- endif -%}
+
+    {%- elsif request.design_mode -%}
+      <p class="shelf-empty">
+        No combos yet. Choose a collection of combo products, or hand-pick them, in the section settings.
+      </p>
+    {%- endif -%}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Purelane combos",
+  "tag": "section",
+  "class": "purelane-shell",
+  "settings": [
+    { "type": "header", "content": "Content" },
+    { "type": "text", "id": "kicker", "label": "Kicker", "default": "Pre-built to save you money" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Best selling combos" },
+    { "type": "checkbox", "id": "show_rule", "label": "Show leaf divider", "default": true },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Swipe through the boxes people order most. Each one is already priced below buying the same products on their own."
+    },
+    { "type": "header", "content": "Combos" },
+    {
+      "type": "select",
+      "id": "source",
+      "label": "Source",
+      "options": [
+        { "value": "collection", "label": "Collection" },
+        { "value": "picked", "label": "Hand-picked products" }
+      ],
+      "default": "collection"
+    },
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Combo collection",
+      "info": "A collection holding your combo products."
+    },
+    { "type": "product_list", "id": "products", "label": "Combos", "limit": 12 },
+    {
+      "type": "range",
+      "id": "combos_to_show",
+      "label": "Combos to show",
+      "min": 2,
+      "max": 12,
+      "step": 1,
+      "default": 6
+    },
+    { "type": "header", "content": "Card" },
+    { "type": "text", "id": "button_label", "label": "Button label", "default": "Shop bundle" },
+    {
+      "type": "text",
+      "id": "fine_print",
+      "label": "Fine print",
+      "default": "Inclusive of all taxes · COD available"
+    },
+    { "type": "header", "content": "Below the rail" },
+    { "type": "text", "id": "swipe_cue", "label": "Swipe cue", "default": "Swipe for more combos" },
+    {
+      "type": "textarea",
+      "id": "rail_note",
+      "label": "Note",
+      "default": "Tapping \"Shop bundle\" opens the bundle picker with these products already added. You can still swap anything before you pay."
+    },
+    { "type": "header", "content": "Layout" },
+    { "type": "text", "id": "anchor_id", "label": "Anchor ID", "default": "combos" },
+    { "type": "range", "id": "scene_depth", "label": "Background depth", "min": 1, "max": 4, "step": 1, "default": 3 },
+    { "type": "range", "id": "padding_top", "label": "Top padding", "min": 0, "max": 100, "step": 2, "unit": "px", "default": 34 },
+    { "type": "range", "id": "padding_bottom", "label": "Bottom padding", "min": 0, "max": 100, "step": 2, "unit": "px", "default": 34 }
+  ],
+  "presets": [{ "name": "Purelane combos" }]
+}
+{% endschema %}
