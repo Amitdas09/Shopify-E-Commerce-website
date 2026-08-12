@@ -1,0 +1,165 @@
+/* ==========================================================================
+   Purelane — build-your-bundle tiers
+   ========================================================================== */
+
+.purelane .tiers {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 760px) {
+  .purelane .tiers {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  }
+}
+
+.purelane .tier {
+  padding: 24px 22px;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.4s var(--ease);
+}
+
+.purelane .tier:hover { transform: translateY(-5px); }
+
+@media (prefers-reduced-motion: reduce) {
+  .purelane .tier:hover { transform: none; }
+}
+
+.purelane .tier.best {
+  border-color: rgba(201, 118, 29, 0.46);
+  box-shadow: 0 22px 54px rgba(58, 44, 112, 0.14), 0 0 0 1px rgba(201, 118, 29, 0.24), var(--g-inset);
+}
+
+.purelane .tier .tag {
+  display: inline-block;
+  align-self: flex-start;
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  padding: 5px 11px;
+  border-radius: 999px;
+  margin-bottom: 14px;
+  background: rgba(201, 118, 29, 0.14);
+  border: 1px solid rgba(201, 118, 29, 0.34);
+  color: var(--leaf-ink);
+}
+
+.purelane .tier .qty {
+  font-family: var(--purelane-display-font, 'Outfit', sans-serif);
+  font-weight: 800;
+  font-size: 52px;
+  line-height: 0.9;
+  color: var(--surface);
+  letter-spacing: -0.03em;
+}
+
+.purelane .tier .qty small {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--paper-3);
+  display: block;
+  margin-top: 6px;
+}
+
+/* --accent stays as designed here: at 27px/700 this is WCAG "large text",
+   where the 3:1 floor applies and #b8701c clears it at 3.48:1. */
+.purelane .tier .price {
+  font-family: var(--purelane-display-font, 'Outfit', sans-serif);
+  font-weight: 700;
+  font-size: 27px;
+  color: var(--accent);
+  margin: 16px 0 4px;
+}
+
+.purelane .tier .price s {
+  font-size: 14px;
+  color: var(--paper-3);
+  font-weight: 500;
+  margin-left: 8px;
+}
+
+.purelane .tier .per {
+  font-size: 12px;
+  color: var(--paper-2);
+  line-height: 1.66;
+}
+
+.purelane .tier ul {
+  list-style: none;
+  margin: 16px 0 20px;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+  flex: 1;
+}
+
+.purelane .tier li {
+  display: flex;
+  gap: 9px;
+  font-size: 13px;
+  color: var(--paper-2);
+}
+
+.purelane .tier li svg {
+  width: 14px;
+  height: 14px;
+  color: var(--leaf);
+  flex: 0 0 auto;
+  margin-top: 4px;
+}
+
+.purelane .tier .btn {
+  width: 100%;
+  justify-content: center;
+}
+
+/* ---------- product row inside a tier ---------- */
+
+.purelane .tierpix {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 2px;
+  height: 78px;
+  margin: -4px 0 16px;
+  padding: 8px 6px;
+  border-radius: 14px;
+  background: linear-gradient(162deg, rgba(255, 255, 255, 0.54), rgba(236, 230, 247, 0.34));
+  border: 1px solid rgba(75, 58, 143, 0.11);
+}
+
+.purelane .tierpix .pl-pimg {
+  height: 62px;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 5px 8px rgba(0, 74, 66, 0.13));
+}
+
+.purelane .tierpix.five .pl-pimg { height: 54px; }
+
+@media (max-width: 760px) {
+  .purelane .tier .qty { font-size: 44px; }
+  .purelane .tierpix { height: 70px; }
+  .purelane .tierpix .pl-pimg { height: 54px; }
+  .purelane .tierpix.five .pl-pimg { height: 46px; }
+}
+
+/* ---------- intro panel ---------- */
+
+.purelane .bundles-intro {
+  margin-bottom: 16px;
+}
+
+.purelane .bundles-intro .panel-head {
+  margin-bottom: 0;
+}
+
+.purelane .bundles-intro .lede {
+  margin: 0 auto;
+}
