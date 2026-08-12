@@ -1,0 +1,73 @@
+{%- comment -%}
+  Purelane product card — the shared card used by the shop grid and available to
+  any future section that needs the same object.
+
+  Production changes against the prototype markup:
+    * <h4> became a configurable heading (default h3). The prototype jumped
+      h2 → h4 inside #shop, which breaks heading navigation.
+    * The title is now a real link to the product. In the prototype the whole
+      card was inert, so nothing was reachable by keyboard or crawlable.
+    * "Add to cart" was a bare <button> with no form. It is now a real
+      /cart/add form that works with JavaScript disabled, and Dawn's cart
+      drawer still upgrades it when present.
+    * Sold-out state is handled — a required seed case — with a disabled
+      control that says so rather than a dead button.
+
+  Params:
+    product      - product object (required)
+    badge        - override pill text (default: purelane.badge metafield)
+    heading_tag  - h2 | h3 | h4 (default h3)
+    reveal_class - e.g. 'rv rv-d2'
+    show_rating  - default true
+    image_sizes  - sizes attribute for the card image
+{%- endcomment -%}
+
+{%- liquid
+  assign p = product
+  assign tag = heading_tag | default: 'h3'
+  assign pill = badge | default: p.metafields.purelane.badge.value
+  assign show_r = show_rating
+  if show_rating == nil
+    assign show_r = true
+  endif
+  assign card_sizes = image_sizes | default: '(min-width: 860px) 250px, (min-width: 560px) 44vw, 42vw'
+  assign variant = p.selected_or_first_available_variant
+-%}
+
+<article class="glass card {{ reveal_class }}">
+  <div class="shot">
+    {%- if pill != blank -%}
+      <span class="pill">{{ pill }}</span>
+    {%- elsif p.available == false -%}
+      <span class="pill pill--out">Sold out</span>
+    {%- endif -%}
+
+    {%- render 'purelane-product-image', product: p, sizes: card_sizes -%}
+  </div>
+
+  <{{ tag }} class="card-title">
+    <a href="{{ p.url }}">{{ p.title }}</a>
+  </{{ tag }}>
+
+  {%- if show_r -%}
+    {%- render 'purelane-rating', product: p -%}
+  {%- endif -%}
+
+  {%- render 'purelane-price', product: p -%}
+
+  {%- if p.available -%}
+    {%- form 'product', p, id: null, class: 'card-form', novalidate: 'novalidate' -%}
+      <input type="hidden" name="id" value="{{ variant.id }}">
+      <input type="hidden" name="quantity" value="1">
+      <button type="submit" class="btn btn-ghost btn-sm" name="add">
+        Add to cart
+        <span class="visually-hidden">— {{ p.title }}</span>
+      </button>
+    {%- endform -%}
+  {%- else -%}
+    <button type="button" class="btn btn-ghost btn-sm" disabled>
+      Sold out
+      <span class="visually-hidden">— {{ p.title }}</span>
+    </button>
+  {%- endif -%}
+</article>
