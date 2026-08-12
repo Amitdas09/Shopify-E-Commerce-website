@@ -1,0 +1,8 @@
+# Generated product art — rebuild with: python tools/make_product_images.py
+tools/seed-images/
+
+# Shopify CLI
+.shopify/
+node_modules/
+.DS_Store
+Thumbs.db

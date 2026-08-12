@@ -1,0 +1,31 @@
+{%- comment -%}
+  Shared Purelane assets. Every Purelane section renders this first so it works
+  standalone — a merchant can add the reviews rail to a page with no hero and it
+  still has its tokens, its fonts and its reveal behaviour.
+
+  Duplicate <link> tags for the same href are deduplicated by the browser at the
+  network layer and are idempotent at the CSS layer. The reveal script guards
+  against double execution internally.
+
+  Fonts: the design specifies Outfit for display and Inter for body. Neither is
+  in Shopify's font picker, so they come from Google Fonts as the prototype did.
+  preconnect is emitted so the connection is warm before the CSS is parsed, and
+  display=swap means text paints in the fallback immediately rather than sitting
+  invisible during the font fetch. Self-hosting the two woff2 subsets in
+  assets/ would remove the third-party connection entirely — see BUILD-NOTES.
+{%- endcomment -%}
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link
+  rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap"
+  media="print"
+  onload="this.media='all'"
+>
+<noscript>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap">
+</noscript>
+
+{{ 'purelane-core.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'purelane-reveal.js' | asset_url }}" defer></script>
