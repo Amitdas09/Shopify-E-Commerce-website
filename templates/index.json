@@ -1,0 +1,194 @@
+{
+  "sections": {
+    "purelane_backdrop": {
+      "type": "purelane-ambient",
+      "settings": {
+        "show_water": true,
+        "show_vignette": true,
+        "parallax": true
+      }
+    },
+    "purelane_hero": {
+      "type": "purelane-hero",
+      "blocks": {
+        "promise_leaf": {
+          "type": "promise",
+          "settings": { "icon": "leaf", "line_1": "Plant", "line_2": "powered" }
+        },
+        "promise_shield": {
+          "type": "promise",
+          "settings": { "icon": "shield", "line_1": "Safe for", "line_2": "kids & pets" }
+        },
+        "promise_nochem": {
+          "type": "promise",
+          "settings": { "icon": "no-chem", "line_1": "Zero harsh", "line_2": "chemicals" }
+        },
+        "slide_one": {
+          "type": "slide",
+          "settings": {
+            "label": "Single bottle",
+            "product_1": "kitchen-cleaner-foaming",
+            "saving_style": "percent"
+          }
+        },
+        "slide_two": {
+          "type": "slide",
+          "settings": {
+            "label": "Any 2 products",
+            "product_1": "tap-cleaner-limescale-remover",
+            "product_2": "kitchen-cleaner-foaming",
+            "price_product": "hard-water-solution-kit",
+            "saving_style": "amount"
+          }
+        },
+        "slide_three": {
+          "type": "slide",
+          "settings": {
+            "label": "Any 3 products",
+            "product_1": "tap-cleaner-limescale-remover",
+            "product_2": "copper-bronze-brass-cleaner",
+            "product_3": "kitchen-cleaner-foaming",
+            "price_product": "kitchen-essentials-combo",
+            "saving_style": "amount"
+          }
+        }
+      },
+      "block_order": [
+        "promise_leaf",
+        "promise_shield",
+        "promise_nochem",
+        "slide_one",
+        "slide_two",
+        "slide_three"
+      ],
+      "settings": {
+        "heading": "Clean\nThat",
+        "heading_highlight": "Lasts",
+        "show_rule": true,
+        "subheading": "Homecare that works on the toughest grime, made from plants. Kind to your home, your family and the world outside it.",
+        "button_1_label": "Shop now",
+        "button_1_link": "#shop",
+        "button_2_label": "How it works",
+        "button_2_link": "#how",
+        "stage_label": "Purelane bundles",
+        "autoplay_seconds": 4,
+        "scene_depth": 1
+      }
+    },
+    "purelane_reviews": {
+      "type": "purelane-reviews",
+      "settings": {
+        "kicker": "That's what they said",
+        "average_rating": "4.8",
+        "rating_caption": "from 8,000+ reviews",
+        "reach_prefix": "Loved by",
+        "reach_number": "12 lakh+",
+        "reach_suffix": "homes",
+        "rail_label": "Customer reviews",
+        "anchor_id": "reviews",
+        "scene_depth": 1,
+        "padding_top": 34,
+        "padding_bottom": 34
+      }
+    },
+    "purelane_combos": {
+      "type": "purelane-combos",
+      "settings": {
+        "kicker": "Pre-built to save you money",
+        "heading": "Best selling combos",
+        "show_rule": true,
+        "subheading": "Swipe through the boxes people order most. Each one is already priced below buying the same products on their own.",
+        "source": "collection",
+        "collection": "combos",
+        "combos_to_show": 6,
+        "button_label": "Shop bundle",
+        "fine_print": "Inclusive of all taxes · COD available",
+        "swipe_cue": "Swipe for more combos",
+        "rail_note": "Tapping \"Shop bundle\" opens the bundle picker with these products already added. You can still swap anything before you pay.",
+        "anchor_id": "combos",
+        "scene_depth": 3,
+        "padding_top": 34,
+        "padding_bottom": 34
+      }
+    },
+    "purelane_bundles": {
+      "type": "purelane-bundles",
+      "blocks": {
+        "tier_starter": {
+          "type": "tier",
+          "settings": {
+            "tag": "Starter",
+            "quantity": 2,
+            "quantity_label": "Products",
+            "product": "hard-water-solution-kit",
+            "features": "Pick any two products\nFree shipping across India",
+            "highlight": false,
+            "button_label": "Build this box",
+            "button_link": "#shop"
+          }
+        },
+        "tier_popular": {
+          "type": "tier",
+          "settings": {
+            "tag": "Most popular",
+            "quantity": 3,
+            "quantity_label": "Products",
+            "product": "kitchen-essentials-combo",
+            "features": "Pick any three products\nCovers kitchen and laundry\nFree shipping across India",
+            "highlight": true,
+            "button_label": "Build this box",
+            "button_link": "#shop"
+          }
+        },
+        "tier_home": {
+          "type": "tier",
+          "settings": {
+            "tag": "Whole home",
+            "quantity": 5,
+            "quantity_label": "Products",
+            "product": "complete-home-bundle",
+            "features": "Pick any five products\nEvery room in one order\nFree shipping across India",
+            "highlight": false,
+            "button_label": "Build this box",
+            "button_link": "#shop"
+          }
+        }
+      },
+      "block_order": ["tier_starter", "tier_popular", "tier_home"],
+      "settings": {
+        "kicker": "Build your bundle",
+        "heading": "One box. Every room.",
+        "subheading": "Mix and match across kitchen, laundry, home and skin. One flat price, no code needed, free shipping either way.",
+        "anchor_id": "bundles",
+        "scene_depth": 3,
+        "padding_top": 34,
+        "padding_bottom": 34
+      }
+    },
+    "purelane_shop": {
+      "type": "purelane-product-grid",
+      "settings": {
+        "kicker": "Bestsellers",
+        "heading": "Loved by 30,000 homes",
+        "show_rule": true,
+        "source": "collection",
+        "collection": "bestsellers",
+        "products_to_show": 8,
+        "columns_desktop": 4,
+        "show_rating": true,
+        "anchor_id": "shop",
+        "scene_depth": 3,
+        "padding_top": 34,
+        "padding_bottom": 34
+      }
+    }
+  },
+  "order": [
+    "purelane_backdrop",
+    "purelane_hero",
+    "purelane_reviews",
+    "purelane_combos",
+    "purelane_bundles",
+    "purelane_shop"
+  ]
+}
