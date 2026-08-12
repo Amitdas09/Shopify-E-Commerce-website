@@ -91,7 +91,7 @@
               </p>
             {%- endif -%}
 
-            {%- if tier_product != blank -%}
+            {%- if tier_product -%}
               <p class="price">
                 {{ price | money }}
                 {%- if compare > price %}
@@ -118,7 +118,7 @@
 
             {%- liquid
               assign href = b.button_link
-              if href == blank and tier_product != blank
+              if href == blank and tier_product
                 assign href = tier_product.url
               endif
             -%}

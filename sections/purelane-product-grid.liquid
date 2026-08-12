@@ -17,7 +17,7 @@
     assign items = section.settings.collection.products
   endif
 
-  assign limit = section.settings.products_to_show
+  assign product_limit = section.settings.products_to_show
 -%}
 
 <div
@@ -51,7 +51,7 @@
 
     <div class="shelf">
       {%- if items.size > 0 -%}
-        {%- for product in items limit: limit -%}
+        {%- for product in items limit: product_limit -%}
           {%- liquid
             assign delay = forloop.index0 | modulo: 5
             assign rc = 'rv'

@@ -104,13 +104,13 @@
             {%- for block in slides -%}
               {%- liquid
                 assign count = 0
-                if block.settings.product_1 != blank
+                if block.settings.product_1
                   assign count = count | plus: 1
                 endif
-                if block.settings.product_2 != blank
+                if block.settings.product_2
                   assign count = count | plus: 1
                 endif
-                if block.settings.product_3 != blank
+                if block.settings.product_3
                   assign count = count | plus: 1
                 endif
                 if count == 0
@@ -128,27 +128,27 @@
                 aria-label="{{ forloop.index }} of {{ slides.size }}{% if block.settings.label != blank %} — {{ block.settings.label | escape }}{% endif %}"
                 {{ block.shopify_attributes }}
               >
-                {%- if block.settings.product_1 != blank -%}
+                {%- if block.settings.product_1 -%}
                   {%- render 'purelane-product-image',
                     product: block.settings.product_1,
                     class: 'hp a d1',
                     sizes: hero_sizes,
                     priority: forloop.first -%}
                 {%- endif -%}
-                {%- if block.settings.product_2 != blank -%}
+                {%- if block.settings.product_2 -%}
                   {%- render 'purelane-product-image',
                     product: block.settings.product_2,
                     class: 'hp b d2',
                     sizes: hero_sizes -%}
                 {%- endif -%}
-                {%- if block.settings.product_3 != blank -%}
+                {%- if block.settings.product_3 -%}
                   {%- render 'purelane-product-image',
                     product: block.settings.product_3,
                     class: 'hp c d3',
                     sizes: hero_sizes -%}
                 {%- endif -%}
 
-                {%- if price_product != blank -%}
+                {%- if price_product -%}
                   <div class="glass-2 ptag">
                     {%- if block.settings.label != blank -%}
                       <span class="lbl">{{ block.settings.label }}</span>

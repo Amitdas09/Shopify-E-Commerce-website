@@ -40,7 +40,12 @@
   endif
 -%}
 
-{%- if img != blank -%}
+{%- comment -%}
+  Truthiness rather than `!= blank` for the object test. Both are correct on
+  Shopify, but only nil-falsiness is unambiguous across Liquid implementations,
+  and this snippet's whole job is the branch where the image is absent.
+{%- endcomment -%}
+{%- if img -%}
   {{
     img
     | image_url: width: 800

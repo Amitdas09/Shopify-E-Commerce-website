@@ -101,7 +101,7 @@
                       <span class="plus" aria-hidden="true">+</span>
                     {%- endunless -%}
                     <span class="it">
-                      {%- if item.featured_image != blank -%}
+                      {%- if item.featured_image -%}
                         {%- render 'purelane-product-image',
                           product: item,
                           sizes: '66px',
