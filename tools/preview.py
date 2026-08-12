@@ -62,6 +62,18 @@ def script_tag(url):
     return '<script src="%s" defer></script>' % url
 
 
+PRELOAD_RE = re.compile(r"\{\{-?\s*[\w.]+\s*\|\s*preload_tag:[^}]*\}\}")
+
+
+def strip_preload(source):
+    """Shopify's documented syntax is `preload_tag: as: 'font'`, and its own
+    theme check accepts it. python-liquid cannot parse it because `as` is a
+    reserved word in its grammar. Preload hints are a network optimisation with
+    no bearing on layout, so the preview drops them rather than the Liquid
+    bending to a limitation of the preview."""
+    return PRELOAD_RE.sub("", source)
+
+
 def image_url(image, width=None, **kwargs):
     if not image:
         return ""
@@ -153,7 +165,7 @@ def shim_form(source):
 
 
 def preprocess(source):
-    return shim_form(strip_schema(source))
+    return strip_preload(shim_form(strip_schema(source)))
 
 
 # ------------------------------------------------------------------ catalogue
