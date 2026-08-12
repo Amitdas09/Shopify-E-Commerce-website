@@ -1,6 +1,9 @@
 # Generated product art — rebuild with: python tools/make_product_images.py
 tools/seed-images/
 
+# Local preview output — rebuild with: python tools/preview.py && python tools/shoot.py
+tools/preview/
+
 # Shopify CLI
 .shopify/
 node_modules/

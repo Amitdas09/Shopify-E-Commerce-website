@@ -9,15 +9,15 @@ So this redraws the same geometry as real raster images that can be uploaded to
 Shopify as product photos, at a size that suits the largest srcset step.
 
 Usage:  python tools/make_product_images.py
-Output: tools/seed-images/*.png  (1600x1600, transparent)
+Output: tools/seed-images/*.png  (1600px tall, the bottle's own ratio, transparent)
 """
 
 import os
 from PIL import Image, ImageDraw
 
 OUT = os.path.join(os.path.dirname(__file__), "seed-images")
-SIZE = 1600
-SS = 2  # supersample factor for clean edges
+HEIGHT = 1600          # long edge; width follows the bottle's own proportions
+SS = 2                 # supersample factor for clean edges
 LABEL = (250, 247, 253)
 
 
@@ -59,15 +59,26 @@ def gradient_body(size, box, radius, rgb, a0=0.95, a1=0.62):
 
 
 def draw_bottle(colour, view_w, view_h, geometry):
-    """Render one bottle. geometry values are in the prototype's viewBox units."""
-    rgb = hex_rgb(colour)
-    canvas = SIZE * SS
+    """Render one bottle. geometry values are in the prototype's viewBox units.
 
-    # Fit the viewBox into the square canvas with a small margin.
-    margin = 0.06
-    scale = min(canvas * (1 - 2 * margin) / view_w, canvas * (1 - 2 * margin) / view_h)
-    ox = (canvas - view_w * scale) / 2
-    oy = (canvas - view_h * scale) / 2
+    The canvas takes the viewBox's own aspect ratio rather than being square.
+    The design sizes every bottle by height and lets width follow from the art
+    (`.hs1 .a { height: 100% }`, `.card .shot .pl-pimg { height: 122px }`), so a
+    square image with transparent side padding renders a bottle that is both too
+    small and too wide — at hero size it overflowed the stage by 200px.
+    """
+    rgb = hex_rgb(colour)
+
+    margin = 0.04
+    inner_h = HEIGHT * (1 - 2 * margin)
+    scale_out = inner_h / view_h
+    out_w = int(round(view_w * scale_out / (1 - 2 * margin)))
+    out_h = HEIGHT
+
+    canvas_w, canvas_h = out_w * SS, out_h * SS
+    scale = (canvas_h * (1 - 2 * margin)) / view_h
+    ox = (canvas_w - view_w * scale) / 2
+    oy = (canvas_h - view_h * scale) / 2
 
     def S(*vals):
         return [v * scale for v in vals]
@@ -75,7 +86,7 @@ def draw_bottle(colour, view_w, view_h, geometry):
     def box(x, y, w, h):
         return [ox + x * scale, oy + y * scale, ox + (x + w) * scale, oy + (y + h) * scale]
 
-    img = Image.new("RGBA", (canvas, canvas), (0, 0, 0, 0))
+    img = Image.new("RGBA", (canvas_w, canvas_h), (0, 0, 0, 0))
 
     cap, neck, body, label, l1, l2 = geometry
 
@@ -97,7 +108,7 @@ def draw_bottle(colour, view_w, view_h, geometry):
     rounded(d, box(*l2), S(4)[0], rgb + (int(255 * 0.35),))
     img = Image.alpha_composite(img, over)
 
-    return img.resize((SIZE, SIZE), Image.LANCZOS)
+    return img.resize((out_w, out_h), Image.LANCZOS)
 
 
 # Geometry lifted from the prototype's SVGs: (cap, neck, body, label, line1, line2)
@@ -155,7 +166,9 @@ def main():
         img = draw_bottle(colour, vw, vh, geom)
         path = os.path.join(OUT, handle + ".png")
         img.save(path, "PNG", optimize=True)
-        print("%-38s %s" % (handle, os.path.getsize(path)))
+        print("%-38s %4dx%-4d  ratio %.3f  %6d bytes"
+              % (handle, img.width, img.height, img.width / img.height,
+                 os.path.getsize(path)))
     print("\n%d images in %s" % (len(PRODUCTS), OUT))
     print("Note: magic-eraser has no image on purpose — it is the required")
     print("      'product with no image' seed case.")
