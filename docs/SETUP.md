@@ -16,13 +16,20 @@ Roughly 45 minutes end to end. Every account used here is free.
 
 The store is created on the current default theme, which is Dawn.
 
-## 2. Confirm you are on stock Dawn
+## 2. You will not be on Dawn — this is expected
 
-**Online Store → Themes**. The live theme should read *Dawn*. If it does not,
-**Add theme → Popular free themes → Dawn**, then publish it.
+**Online Store → Themes** on a new store now reads **Horizon**, not Dawn.
+Shopify changed the default theme, so "the one new stores start on" is no longer
+Dawn. Horizon is a different architecture entirely and these sections do not
+target it.
 
-Do not install anything else. The five sections drop into stock Dawn and rely on
-nothing a premium theme provides.
+Do not fight it and do not delete Horizon. Step 4 clones Dawn from Shopify's own
+repository and pushes it as a separate theme, which you then publish. That is
+both simpler and a stricter reading of "clean install of Dawn" than pulling it
+from the theme store.
+
+Nothing else gets installed. The five sections rely on nothing a premium theme
+provides.
 
 ## 3. Install the Shopify CLI
 
@@ -34,20 +41,19 @@ Verify with `shopify version`.
 
 ## 4. Pull Dawn, then add these sections
 
-```bash
-git clone https://github.com/Shopify/dawn.git purelane-store
-cd purelane-store
+From inside this repo:
 
-# copy this repo's files over stock Dawn
-cp -r /path/to/purelane-dawn/assets/*        assets/
-cp -r /path/to/purelane-dawn/sections/*      sections/
-cp -r /path/to/purelane-dawn/snippets/*      snippets/
-cp    /path/to/purelane-dawn/templates/index.json templates/index.json
+```bash
+bash tools/install-into-dawn.sh ../purelane-store
+cd ../purelane-store
 ```
 
+That clones stock Dawn from Shopify's own repository, copies the 25 Purelane
+files in, and swaps the homepage template — keeping Dawn's original at
+`templates/index.dawn-original.json` so you can diff it.
+
 Nothing overwrites a stock Dawn file. Every added file is prefixed `purelane-`,
-and `templates/index.json` is the only replacement — keep a copy of Dawn's
-original if you want to diff it.
+and `templates/index.json` is the only replacement.
 
 ```bash
 shopify theme dev --store your-store.myshopify.com
