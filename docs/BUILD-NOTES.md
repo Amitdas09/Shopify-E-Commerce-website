@@ -99,6 +99,45 @@ For a marquee, "finish in 0.01ms" means *complete* — the track jumps to
 empty. It needs `animation: none`, not a faster animation. With motion reduced
 the rail is now a normal horizontal scroller.
 
+### The hero art is not the same art as the cards
+
+This one only showed up once the sections were rendered and looked at.
+
+The prototype uses two different bottle drawings for the same products.
+`#shop` and `#combos` use `p-kitchen`, `p-tap`, `p-dish` and friends, at an
+aspect ratio around **0.64**. The hero uses `p-kbtl`, `p-tbtl` and `p-mbtl` —
+the same bottles redrawn much taller and narrower, around **0.32**.
+
+The hero stage geometry depends on that. It sizes each bottle by height
+(`.hs1 .a { height: 100% }`) and lets width fall out of the artwork. Three
+bottles at 0.32 fit a 560px stage. Three bottles at 0.64 are about twice the
+stage width and spill across the headline.
+
+Shopify gives a product one featured image. So the first normally-proportioned
+photo a merchant uploads breaks the hero. The stage now carries a width ceiling
+per position and leans on `object-fit: contain` with
+`object-position: center bottom`, which holds the composition and the baseline
+at any ratio.
+
+### Duplicated base CSS silently beat the section CSS
+
+Every section requests `purelane-core.css` so it can stand alone. That means
+the browser sees the base rules once per section on the page — and the *last*
+copy sits after the first section's own stylesheet.
+
+`.purelane .glass-2 { position: relative }` and
+`.purelane-hero .badges { position: absolute }` have identical specificity, so
+source order decided it, and the shop grid's copy of core.css — five sections
+further down the document — won. The hero badge rail dropped out of position
+entirely.
+
+Both files now declare `@layer purelane-base, purelane-section;` and put their
+rules in the matching layer. Layer order is set by the first declaration and is
+immune to how many times either file is emitted, or in what order.
+
+This is the class of bug that only appears once more than one section is on the
+page, which is exactly what a prototype never tests.
+
 ---
 
 ## What I changed, and why
@@ -168,6 +207,30 @@ can be added, removed or reordered like anything else — and every content
 section still works when it is absent. Sections declare their depth with
 `data-purelane-scene`; the backdrop discovers them, and re-discovers them on
 `shopify:section:load` and `:unload`.
+
+---
+
+## Seeing it before there is a store
+
+`tools/preview.py` renders the real section files to a static page with the
+Shopify objects and filters shimmed and the seed catalogue loaded.
+`tools/shoot.py` then screenshots it at 375 through 1440 and reports any
+JavaScript error.
+
+It is a preview, not an emulator — Shopify's renderer is the authority. But
+three of the findings above came out of it and out of nothing else: the hero art
+ratio, the cascade-layer collision, and `limit` being unusable as a variable
+name because it collides with the `for` tag's keyword argument. All three read
+as correct code. None of them survive being looked at.
+
+Two divergences to know about when reading its output:
+
+- python-liquid treats `nil != blank` as **true**; Shopify treats nil as blank.
+  Object tests are therefore written as truthiness (`{% if img %}`), which means
+  the same thing in both and is the right test for a drop anyway.
+- A missing metafield returns Undefined rather than nil, so the preview supplies
+  an empty string instead. Without that it renders empty badge pills the real
+  store would never show.
 
 ---
 

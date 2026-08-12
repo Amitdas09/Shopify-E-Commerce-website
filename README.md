@@ -67,11 +67,31 @@ python tools/make_product_images.py     # product art, redrawn from the design
 - [docs/metafields.md](docs/metafields.md) — every definition to create
 - [docs/SETUP.md](docs/SETUP.md) — store setup and the QA checklist
 
+## Seeing it without a store
+
+Liquid does not open in a browser. This renders the real section files with the
+Shopify objects shimmed and the seed catalogue loaded, then screenshots the
+result at every breakpoint the design cares about:
+
+```bash
+pip install python-liquid playwright && playwright install chromium
+python tools/make_product_images.py   # once
+python tools/preview.py --open        # -> tools/preview/index.html
+python tools/shoot.py                 # -> tools/preview/shots/*.png
+```
+
+It is a preview, not an emulator — Shopify's renderer is the authority, and
+cart, routing and the image CDN are not reproduced. It exists to catch layout
+and Liquid mistakes before they reach a store, and it earned its keep: three of
+the findings in the build notes came out of it and out of nothing else.
+
 ## Verifying
 
 ```bash
 python tools/verify.py
 ```
 
-Parses every `{% schema %}` block as JSON, syntax-checks every JS asset, parses
-the seed CSV, and recomputes the contrast ratios quoted in the build notes.
+Parses every `{% schema %}` block as JSON, checks setting ids are unique and
+actually used, resolves every rendered snippet and `asset_url`, syntax-checks
+every JS asset, parses the seed CSV and confirms it carries all three required
+edge cases, and recomputes the contrast ratios quoted in the build notes.
