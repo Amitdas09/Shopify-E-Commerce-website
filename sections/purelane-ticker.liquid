@@ -1,0 +1,61 @@
+{%- comment -%}
+  Purelane — scrolling ticker bar.
+
+  Replaces Dawn's announcement-bar in the header group. Each message is a block,
+  and the strip is duplicated so the marquee loops without a visible gap — the
+  duplicate is aria-hidden so a screen reader hears each message once.
+
+  aria-hidden on the whole strip in the prototype meant the offers were
+  announced to nobody at all. Here the first pass is real content.
+{%- endcomment -%}
+
+{%- render 'purelane-assets' -%}
+{{ 'purelane-chrome.css' | asset_url | stylesheet_tag }}
+
+{%- if section.blocks.size > 0 -%}
+  <div class="purelane">
+    <div class="purelane-ticker" role="region" aria-label="{{ section.settings.label | escape }}">
+      <div class="track">
+        {%- for pass in (1..2) -%}
+          {%- for block in section.blocks -%}
+            <span {% if pass == 2 %}aria-hidden="true"{% endif %} {{ block.shopify_attributes }}>
+              {{- block.settings.text -}}
+              {%- if block.settings.highlight != blank %} <b>{{ block.settings.highlight }}</b>{% endif -%}
+            </span>
+          {%- endfor -%}
+        {%- endfor -%}
+      </div>
+    </div>
+  </div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Purelane ticker",
+  "max_blocks": 8,
+  "settings": [
+    { "type": "text", "id": "label", "label": "Label for screen readers", "default": "Store offers" }
+  ],
+  "blocks": [
+    {
+      "type": "message",
+      "name": "Message",
+      "settings": [
+        { "type": "text", "id": "text", "label": "Text", "default": "Free shipping" },
+        { "type": "text", "id": "highlight", "label": "Highlighted text", "default": "on every bundle across India" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Purelane ticker",
+      "blocks": [
+        { "type": "message", "settings": { "text": "Free shipping", "highlight": "on every bundle across India" } },
+        { "type": "message", "settings": { "text": "100% plant-based", "highlight": "and non-toxic" } },
+        { "type": "message", "settings": { "text": "Loved by", "highlight": "30,000+ happy homes" } },
+        { "type": "message", "settings": { "text": "Buy 3", "highlight": "at flat ₹499" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

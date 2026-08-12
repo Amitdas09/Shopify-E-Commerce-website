@@ -1,0 +1,125 @@
+{%- comment -%}
+  Purelane — footer. Replaces Dawn's footer in the footer group.
+
+  Link columns are blocks, each pointing at a real Shopify navigation menu, so
+  marketing edits the menu rather than the theme.
+{%- endcomment -%}
+
+{%- render 'purelane-assets' -%}
+{{ 'purelane-chrome.css' | asset_url | stylesheet_tag }}
+
+<div class="purelane">
+  <footer class="purelane-footer" data-purelane-scene="{{ section.settings.scene_depth }}">
+    <div class="wrap">
+      <div class="fgrid">
+        <div class="fcol">
+          <a class="brand" href="{{ routes.root_url }}">
+            <span class="mark">
+              {%- render 'purelane-icon', icon: 'leaf' -%}
+            </span>
+            <span class="txt">
+              <span class="n1">{{ section.settings.brand_name | default: shop.name }}</span>
+              {%- if section.settings.tagline != blank -%}
+                <span class="n2">{{ section.settings.tagline }}</span>
+              {%- endif -%}
+            </span>
+          </a>
+          {%- if section.settings.blurb != blank -%}
+            <p style="max-width:30ch">{{ section.settings.blurb }}</p>
+          {%- endif -%}
+        </div>
+
+        {%- for block in section.blocks -%}
+          <div class="fcol" {{ block.shopify_attributes }}>
+            {%- if block.settings.heading != blank -%}
+              <h2>{{ block.settings.heading }}</h2>
+            {%- endif -%}
+
+            {%- case block.type -%}
+              {%- when 'menu' -%}
+                {%- if block.settings.menu != blank -%}
+                  <ul>
+                    {%- for link in block.settings.menu.links -%}
+                      <li><a href="{{ link.url }}">{{ link.title }}</a></li>
+                    {%- endfor -%}
+                  </ul>
+                {%- endif -%}
+
+              {%- when 'contact' -%}
+                {%- if block.settings.email != blank -%}
+                  <a href="mailto:{{ block.settings.email }}">{{ block.settings.email }}</a>
+                {%- endif -%}
+                {%- if block.settings.phone != blank -%}
+                  <a href="tel:{{ block.settings.phone | remove: ' ' }}">{{ block.settings.phone }}</a>
+                {%- endif -%}
+                {%- if block.settings.legal != blank -%}
+                  <p style="font-size:12px;color:var(--paper-3)">{{ block.settings.legal }}</p>
+                {%- endif -%}
+            {%- endcase -%}
+          </div>
+        {%- endfor -%}
+      </div>
+
+      <div class="fbot">
+        <span>&copy; {{ 'now' | date: '%Y' }} {{ section.settings.legal_name | default: shop.name }}</span>
+        {%- if section.settings.policy_menu != blank -%}
+          <span>
+            {%- for link in section.settings.policy_menu.links -%}
+              <a href="{{ link.url }}">{{ link.title }}</a>{% unless forloop.last %} · {% endunless %}
+            {%- endfor -%}
+          </span>
+        {%- endif -%}
+      </div>
+    </div>
+  </footer>
+</div>
+
+{% schema %}
+{
+  "name": "Purelane footer",
+  "max_blocks": 3,
+  "settings": [
+    { "type": "text", "id": "brand_name", "label": "Brand name", "default": "Purelane" },
+    { "type": "text", "id": "tagline", "label": "Tagline", "default": "Clean, simply" },
+    {
+      "type": "textarea",
+      "id": "blurb",
+      "label": "Blurb",
+      "default": "Effective cleaning, powered by nature. Made for Indian homes since day one."
+    },
+    { "type": "text", "id": "legal_name", "label": "Legal name", "default": "Purelane Eco Products Private Limited" },
+    { "type": "link_list", "id": "policy_menu", "label": "Policy menu", "default": "footer" },
+    { "type": "range", "id": "scene_depth", "label": "Background depth", "min": 1, "max": 4, "step": 1, "default": 4 }
+  ],
+  "blocks": [
+    {
+      "type": "menu",
+      "name": "Link column",
+      "settings": [
+        { "type": "text", "id": "heading", "label": "Heading", "default": "Shop" },
+        { "type": "link_list", "id": "menu", "label": "Menu" }
+      ]
+    },
+    {
+      "type": "contact",
+      "name": "Contact column",
+      "settings": [
+        { "type": "text", "id": "heading", "label": "Heading", "default": "Get in touch" },
+        { "type": "text", "id": "email", "label": "Email", "default": "hello@purelane.com" },
+        { "type": "text", "id": "phone", "label": "Phone", "default": "+91 9930 123 234" },
+        { "type": "text", "id": "legal", "label": "Legal line", "default": "Purelane Eco Products Pvt Ltd" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Purelane footer",
+      "blocks": [
+        { "type": "menu", "settings": { "heading": "Shop" } },
+        { "type": "menu", "settings": { "heading": "About" } },
+        { "type": "contact" }
+      ]
+    }
+  ]
+}
+{% endschema %}

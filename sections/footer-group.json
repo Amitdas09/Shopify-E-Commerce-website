@@ -1,0 +1,42 @@
+{
+  "type": "footer",
+  "name": "Footer",
+  "sections": {
+    "purelane_footer": {
+      "type": "purelane-footer",
+      "blocks": {
+        "shop": { "type": "menu", "settings": { "heading": "Shop", "menu": "main-menu" } },
+        "about": { "type": "menu", "settings": { "heading": "About", "menu": "footer" } },
+        "contact": {
+          "type": "contact",
+          "settings": {
+            "heading": "Get in touch",
+            "email": "hello@purelane.com",
+            "phone": "+91 9930 123 234",
+            "legal": "Purelane Eco Products Pvt Ltd"
+          }
+        }
+      },
+      "block_order": ["shop", "about", "contact"],
+      "settings": {
+        "brand_name": "Purelane",
+        "tagline": "Clean, simply",
+        "blurb": "Effective cleaning, powered by nature. Made for Indian homes since day one.",
+        "legal_name": "Purelane Eco Products Private Limited",
+        "policy_menu": "footer",
+        "scene_depth": 4
+      }
+    },
+    "purelane_sticky": {
+      "type": "purelane-sticky-cta",
+      "settings": {
+        "product": "kitchen-essentials-combo",
+        "headline": "Pick any 3, pay ₹499",
+        "subline": "Free shipping, always",
+        "button_label": "Build bundle",
+        "link": "/#bundles"
+      }
+    }
+  },
+  "order": ["purelane_footer", "purelane_sticky"]
+}

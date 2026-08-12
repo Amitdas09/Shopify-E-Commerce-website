@@ -1,0 +1,74 @@
+{%- comment -%}
+  Purelane — trust bar
+{%- endcomment -%}
+
+{%- render 'purelane-assets' -%}
+{{ 'purelane-content.css' | asset_url | stylesheet_tag }}
+
+<div
+  class="purelane purelane-section"
+  data-purelane-scene="{{ section.settings.scene_depth }}"
+  style="--pl-pt:{{ section.settings.padding_top }}px; --pl-pb:{{ section.settings.padding_bottom }}px;"
+>
+  <div class="wrap">
+    {%- if section.blocks.size > 0 -%}
+      <div class="glass trust rv" data-purelane-reveal>
+        {%- for block in section.blocks -%}
+          <div class="trust-i" {{ block.shopify_attributes }}>
+            {%- render 'purelane-icon', icon: block.settings.icon -%}
+            <span>{{ block.settings.text | newline_to_br }}</span>
+          </div>
+        {%- endfor -%}
+      </div>
+    {%- elsif request.design_mode -%}
+      <p class="shelf-empty">Add a trust point to get started.</p>
+    {%- endif -%}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Purelane trust bar",
+  "tag": "section",
+  "class": "purelane-shell",
+  "max_blocks": 6,
+  "settings": [
+    { "type": "range", "id": "scene_depth", "label": "Background depth", "min": 1, "max": 4, "step": 1, "default": 4 },
+    { "type": "range", "id": "padding_top", "label": "Top padding", "min": 0, "max": 100, "step": 2, "unit": "px", "default": 34 },
+    { "type": "range", "id": "padding_bottom", "label": "Bottom padding", "min": 0, "max": 100, "step": 2, "unit": "px", "default": 34 }
+  ],
+  "blocks": [
+    {
+      "type": "point",
+      "name": "Trust point",
+      "settings": [
+        {
+          "type": "select",
+          "id": "icon",
+          "label": "Icon",
+          "options": [
+            { "value": "leaf", "label": "Leaf" },
+            { "value": "shield", "label": "Shield" },
+            { "value": "truck", "label": "Delivery" },
+            { "value": "check", "label": "Check" },
+            { "value": "no-chem", "label": "No chemicals" }
+          ],
+          "default": "leaf"
+        },
+        { "type": "textarea", "id": "text", "label": "Text", "default": "Plant derived\nformulas", "info": "Line breaks are kept." }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Purelane trust bar",
+      "blocks": [
+        { "type": "point", "settings": { "icon": "leaf", "text": "Plant derived\nformulas" } },
+        { "type": "point", "settings": { "icon": "check", "text": "Recyclable\npackaging" } },
+        { "type": "point", "settings": { "icon": "shield", "text": "Safe for\nkids & pets" } },
+        { "type": "point", "settings": { "icon": "truck", "text": "Made in\nIndia" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,97 @@
+{%- comment -%}
+  Purelane — floating nav pill.
+
+  Replaces Dawn's header. Menu comes from a real Shopify navigation menu, the
+  cart count is live, and search and account link to their real routes.
+
+  Production changes against the prototype:
+    * the burger opened nothing at all — there was no mobile menu behind it.
+      It now toggles a real drawer with aria-expanded.
+    * search, account and cart were <button> elements that did nothing. They
+      are links to /search, the account route and /cart.
+    * the cart badge was hardcoded to 0.
+{%- endcomment -%}
+
+{%- render 'purelane-assets' -%}
+{{ 'purelane-chrome.css' | asset_url | stylesheet_tag }}
+
+<div class="purelane">
+  <header class="purelane-header" data-purelane-header>
+    <div class="navpill glass">
+      <a class="brand" href="{{ routes.root_url }}" aria-label="{{ shop.name | escape }} home">
+        <span class="mark">
+          {%- if section.settings.logo != blank -%}
+            {{ section.settings.logo | image_url: width: 80 | image_tag: alt: shop.name, loading: 'eager' }}
+          {%- else -%}
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 3 20.5 8v8L12 21 3.5 16V8L12 3Z"/>
+              <path d="M12 12 20.5 8M12 12v9M12 12 3.5 8"/>
+            </svg>
+          {%- endif -%}
+        </span>
+        <span class="txt">
+          <span class="n1">{{ section.settings.brand_name | default: shop.name }}</span>
+          {%- if section.settings.tagline != blank -%}
+            <span class="n2">{{ section.settings.tagline }}</span>
+          {%- endif -%}
+        </span>
+      </a>
+
+      {%- if section.settings.menu != blank -%}
+        <nav class="nav" aria-label="Main">
+          {%- for link in section.settings.menu.links -%}
+            <a href="{{ link.url }}"{% if link.active %} aria-current="page"{% endif %}>{{ link.title }}</a>
+          {%- endfor -%}
+        </nav>
+      {%- endif -%}
+
+      <div class="navtools">
+        {%- if section.settings.show_search -%}
+          <a class="ico hide-s" href="{{ routes.search_url }}" aria-label="Search">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          </a>
+        {%- endif -%}
+
+        {%- if shop.customer_accounts_enabled -%}
+          <a class="ico hide-s" href="{% if customer %}{{ routes.account_url }}{% else %}{{ routes.account_login_url }}{% endif %}" aria-label="{% if customer %}Account{% else %}Log in{% endif %}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c0-3.6 3.1-5.6 7-5.6s7 2 7 5.6"/></svg>
+          </a>
+        {%- endif -%}
+
+        <a class="ico" href="{{ routes.cart_url }}" aria-label="Cart, {{ cart.item_count }} {{ cart.item_count | pluralize: 'item', 'items' }}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h2l2.2 10.4a1.6 1.6 0 0 0 1.6 1.3h7.6a1.6 1.6 0 0 0 1.6-1.3L20.5 9H6.4"/><circle cx="10" cy="20.5" r="1.1"/><circle cx="17.5" cy="20.5" r="1.1"/></svg>
+          <span class="dot" aria-hidden="true">{{ cart.item_count }}</span>
+        </a>
+
+        {%- if section.settings.menu != blank -%}
+          <button class="ico burger" type="button" data-purelane-menu aria-expanded="false" aria-controls="pl-drawer-{{ section.id }}" aria-label="Menu">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 8h16M4 16h16"/></svg>
+          </button>
+        {%- endif -%}
+      </div>
+    </div>
+
+    {%- if section.settings.menu != blank -%}
+      <nav class="drawer glass" id="pl-drawer-{{ section.id }}" aria-label="Mobile">
+        {%- for link in section.settings.menu.links -%}
+          <a href="{{ link.url }}"{% if link.active %} aria-current="page"{% endif %}>{{ link.title }}</a>
+        {%- endfor -%}
+      </nav>
+    {%- endif -%}
+  </header>
+</div>
+
+<script src="{{ 'purelane-chrome.js' | asset_url }}" defer></script>
+
+{% schema %}
+{
+  "name": "Purelane header",
+  "settings": [
+    { "type": "image_picker", "id": "logo", "label": "Logo" },
+    { "type": "text", "id": "brand_name", "label": "Brand name", "default": "Purelane" },
+    { "type": "text", "id": "tagline", "label": "Tagline", "default": "Clean, simply" },
+    { "type": "link_list", "id": "menu", "label": "Menu", "default": "main-menu" },
+    { "type": "checkbox", "id": "show_search", "label": "Show search", "default": true }
+  ]
+}
+{% endschema %}

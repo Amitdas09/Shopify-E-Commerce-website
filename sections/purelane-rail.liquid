@@ -1,0 +1,57 @@
+{%- comment -%}
+  Purelane — fixed progress rail, shown from 1180px up.
+
+  Each dot is a block pointing at a section anchor. The prototype hardcoded
+  seven links, two of which (#voices) pointed at an element that does not exist
+  anywhere in the file — a dead link the rail silently skipped.
+{%- endcomment -%}
+
+{%- render 'purelane-assets' -%}
+{{ 'purelane-chrome.css' | asset_url | stylesheet_tag }}
+
+{%- if section.blocks.size > 0 -%}
+  <div class="purelane">
+    <nav class="purelane-rail" aria-label="{{ section.settings.label | escape }}">
+      {%- for block in section.blocks -%}
+        {%- assign anchor = block.settings.anchor | handle -%}
+        <a href="#{{ anchor }}" aria-label="{{ block.settings.label | escape }}" {{ block.shopify_attributes }}></a>
+      {%- endfor -%}
+    </nav>
+  </div>
+
+  <script src="{{ 'purelane-chrome.js' | asset_url }}" defer></script>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Purelane progress rail",
+  "max_blocks": 10,
+  "settings": [
+    { "type": "text", "id": "label", "label": "Label for screen readers", "default": "Section progress" }
+  ],
+  "blocks": [
+    {
+      "type": "dot",
+      "name": "Section dot",
+      "settings": [
+        { "type": "text", "id": "anchor", "label": "Anchor ID", "default": "shop", "info": "Must match a section's Anchor ID setting." },
+        { "type": "text", "id": "label", "label": "Label", "default": "Shop" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Purelane progress rail",
+      "blocks": [
+        { "type": "dot", "settings": { "anchor": "reviews", "label": "Reviews" } },
+        { "type": "dot", "settings": { "anchor": "ingredients", "label": "Ingredients" } },
+        { "type": "dot", "settings": { "anchor": "how", "label": "How it works" } },
+        { "type": "dot", "settings": { "anchor": "proof", "label": "Proof" } },
+        { "type": "dot", "settings": { "anchor": "combos", "label": "Combos" } },
+        { "type": "dot", "settings": { "anchor": "bundles", "label": "Bundles" } },
+        { "type": "dot", "settings": { "anchor": "shop", "label": "Shop" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

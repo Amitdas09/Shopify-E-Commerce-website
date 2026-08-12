@@ -358,6 +358,13 @@ def section(sid, settings, blocks=None):
     }
 
 
+def collection(handle, products, tag=None):
+    """Minimal collection drop: the sections only read .products, .title, .url."""
+    items = [p for p in products.values() if tag is None or tag in p["tags"]]
+    return {"handle": handle, "title": handle.title(),
+            "url": "/collections/%s" % handle, "products": items}
+
+
 def build_sections(products):
     bestsellers = [p for p in products.values() if "bestsellers" in p["tags"]]
     combos = [p for p in products.values() if "combos" in p["tags"]]

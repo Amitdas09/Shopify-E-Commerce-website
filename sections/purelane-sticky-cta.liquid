@@ -1,0 +1,59 @@
+{%- comment -%}
+  Purelane — sticky mobile CTA bar, hidden from 960px up.
+
+  The prototype hardcoded "Pick any 3, pay ₹499". Point it at the bundle product
+  and the price comes from the platform instead.
+{%- endcomment -%}
+
+{%- render 'purelane-assets' -%}
+{{ 'purelane-chrome.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign p = section.settings.product
+  assign headline = section.settings.headline
+  if headline == blank and p != blank
+    assign headline = p.price | money | prepend: ' — ' | prepend: p.title
+  endif
+-%}
+
+{%- if headline != blank -%}
+  <div class="purelane">
+    <div class="purelane-sticky">
+      <span class="lbl">
+        <b>{{ headline }}</b>
+        {%- if section.settings.subline != blank -%}
+          <span>{{ section.settings.subline }}</span>
+        {%- endif -%}
+      </span>
+
+      {%- liquid
+        assign href = section.settings.link
+        if href == blank and p != blank
+          assign href = p.url
+        endif
+      -%}
+      {%- if section.settings.button_label != blank and href != blank -%}
+        <a class="btn btn-primary btn-sm" href="{{ href }}">{{ section.settings.button_label }}</a>
+      {%- endif -%}
+    </div>
+  </div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Purelane sticky CTA",
+  "settings": [
+    {
+      "type": "product",
+      "id": "product",
+      "label": "Bundle product",
+      "info": "Used for the price and the link when the fields below are empty."
+    },
+    { "type": "text", "id": "headline", "label": "Headline", "default": "Pick any 3, pay ₹499" },
+    { "type": "text", "id": "subline", "label": "Subline", "default": "Free shipping, always" },
+    { "type": "text", "id": "button_label", "label": "Button", "default": "Build bundle" },
+    { "type": "url", "id": "link", "label": "Button link" }
+  ],
+  "presets": [{ "name": "Purelane sticky CTA" }]
+}
+{% endschema %}

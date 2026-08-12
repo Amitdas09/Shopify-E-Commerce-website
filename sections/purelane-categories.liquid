@@ -1,0 +1,107 @@
+{%- comment -%}
+  Purelane — Find the right bundle  (prototype: #categories)
+
+  Each tile links to a real collection and shows a real product's art.
+  The prototype's tiles all pointed at the same #combos anchor.
+{%- endcomment -%}
+
+{%- render 'purelane-assets' -%}
+{{ 'purelane-content.css' | asset_url | stylesheet_tag }}
+
+{%- assign anchor = section.settings.anchor_id | default: 'categories' | handle -%}
+
+<div
+  class="purelane purelane-section"
+  id="{{ anchor }}"
+  data-purelane-scene="{{ section.settings.scene_depth }}"
+  style="--pl-pt:{{ section.settings.padding_top }}px; --pl-pb:{{ section.settings.padding_bottom }}px;"
+>
+  <div class="wrap">
+    {%- if section.settings.heading != blank -%}
+      <div class="panel-head rv" data-purelane-reveal>
+        {%- if section.settings.kicker != blank -%}
+          <span class="kicker">{{ section.settings.kicker }}</span>
+        {%- endif -%}
+        <h2 class="d2">{{ section.settings.heading }}</h2>
+      </div>
+    {%- endif -%}
+
+    {%- if section.blocks.size > 0 -%}
+      <div class="cats">
+        {%- for block in section.blocks -%}
+          {%- liquid
+            assign col = block.settings.collection
+            assign art = block.settings.product | default: col.products.first
+
+            assign href = block.settings.link
+            if href == blank and col != blank
+              assign href = col.url
+            endif
+
+            assign title = block.settings.heading | default: col.title
+
+            assign rc = 'rv'
+            if forloop.index0 > 0
+              assign rc = 'rv rv-d' | append: forloop.index0
+            endif
+          -%}
+
+          <a class="glass cat {{ rc }}" href="{{ href | default: '#' }}" data-purelane-reveal {{ block.shopify_attributes }}>
+            <span class="ph">
+              {%- if art != blank -%}
+                {%- render 'purelane-product-image', product: art, sizes: '176px', alt: title -%}
+              {%- endif -%}
+            </span>
+            <span class="txt">
+              {%- if title != blank -%}<h3>{{ title }}</h3>{%- endif -%}
+              {%- if block.settings.text != blank -%}<p>{{ block.settings.text }}</p>{%- endif -%}
+            </span>
+          </a>
+        {%- endfor -%}
+      </div>
+    {%- elsif request.design_mode -%}
+      <p class="shelf-empty">Add a category to get started.</p>
+    {%- endif -%}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Purelane categories",
+  "tag": "section",
+  "class": "purelane-shell",
+  "max_blocks": 8,
+  "settings": [
+    { "type": "text", "id": "kicker", "label": "Kicker", "default": "Bundle categories" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Find the right bundle for you" },
+    { "type": "text", "id": "anchor_id", "label": "Anchor ID", "default": "categories" },
+    { "type": "range", "id": "scene_depth", "label": "Background depth", "min": 1, "max": 4, "step": 1, "default": 4 },
+    { "type": "range", "id": "padding_top", "label": "Top padding", "min": 0, "max": 100, "step": 2, "unit": "px", "default": 34 },
+    { "type": "range", "id": "padding_bottom", "label": "Bottom padding", "min": 0, "max": 100, "step": 2, "unit": "px", "default": 34 }
+  ],
+  "blocks": [
+    {
+      "type": "category",
+      "name": "Category",
+      "settings": [
+        { "type": "collection", "id": "collection", "label": "Collection" },
+        { "type": "product", "id": "product", "label": "Artwork from product", "info": "Falls back to the collection's first product." },
+        { "type": "text", "id": "heading", "label": "Heading", "info": "Falls back to the collection title." },
+        { "type": "text", "id": "text", "label": "Text", "default": "Grease, dishes & more" },
+        { "type": "url", "id": "link", "label": "Link", "info": "Falls back to the collection." }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Purelane categories",
+      "blocks": [
+        { "type": "category", "settings": { "heading": "Kitchen bundle", "text": "Grease, dishes & more" } },
+        { "type": "category", "settings": { "heading": "Bathroom bundle", "text": "Deep clean & disinfect" } },
+        { "type": "category", "settings": { "heading": "Laundry bundle", "text": "Softer, fresher wash" } },
+        { "type": "category", "settings": { "heading": "Hard water bundle", "text": "Melt away limescale" } }
+      ]
+    }
+  ]
+}
+{% endschema %}
