@@ -1,0 +1,74 @@
+{%- comment -%}
+  Purelane — ambient backdrop.
+
+  Add once, anywhere in the template. It renders the fixed mint ground, the
+  caustic layers and the bubbles that every other section sits on, and it
+  crossfades between four depths as the visitor scrolls.
+
+  It is deliberately not part of the hero. In the prototype the backdrop lived
+  in a global div outside any section, so in a real theme it would have had
+  nowhere to live and would have ended up hardcoded into theme.liquid — where a
+  merchant could never turn it off. As its own section it can be added, removed
+  or reordered like anything else, and every content section keeps working
+  whether or not it is present.
+{%- endcomment -%}
+
+{{ 'purelane-ambient.css' | asset_url | stylesheet_tag }}
+
+<div
+  class="purelane-scenes"
+  data-purelane-ambient
+  data-parallax="{{ section.settings.parallax }}"
+  data-d="1"
+  aria-hidden="true"
+>
+  <div class="scene s1 on"></div>
+  <div class="scene s2"></div>
+  <div class="scene s3"></div>
+  <div class="scene s4"></div>
+
+  {%- if section.settings.show_water -%}
+    {%- render 'purelane-water', ns: section.id -%}
+  {%- endif -%}
+
+  {%- if section.settings.show_vignette -%}
+    <div class="vig"></div>
+  {%- endif -%}
+</div>
+
+<script src="{{ 'purelane-ambient.js' | asset_url }}" defer></script>
+
+{% schema %}
+{
+  "name": "Purelane backdrop",
+  "tag": "div",
+  "class": "purelane-backdrop-shell",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "The animated water background that sits behind every Purelane section. Add it once per template."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_water",
+      "label": "Show caustics and bubbles",
+      "default": true,
+      "info": "The most expensive thing on the page to paint. Turn it off if you need to buy back rendering time; the mint gradient stays."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_vignette",
+      "label": "Show vignette",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "parallax",
+      "label": "Parallax on scroll and pointer",
+      "default": true,
+      "info": "Automatically off for visitors who prefer reduced motion."
+    }
+  ],
+  "presets": [{ "name": "Purelane backdrop" }]
+}
+{% endschema %}
