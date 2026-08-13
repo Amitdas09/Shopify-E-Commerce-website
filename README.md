@@ -59,7 +59,8 @@ than five seconds.
 
 ### Every section is merchant-editable
 
-![Theme editor](docs/screenshots/theme-editor.jpg)
+<img width="1919" height="875" alt="image" src="https://github.com/user-attachments/assets/dda8f131-cb99-492e-bbce-72659a6fd863" />
+
 
 Fifteen sections in the theme editor. A marketing team adds, removes, reorders
 and reconfigures them with no developer, and nothing breaks when they do —
