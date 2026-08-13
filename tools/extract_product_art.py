@@ -25,8 +25,34 @@ import sys
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-PROTO = os.path.abspath(os.path.join(HERE, "..", "..", "purelane-homepage.html"))
 OUT = os.path.join(HERE, "seed-images", "flat")
+
+
+def find_prototype():
+    """Locate purelane-homepage.html.
+
+    The repo carries its own copy in docs/, so a fresh clone regenerates the
+    artwork with nothing else on disk — the design file is the input to this
+    script, not merely reference. The parent directory is still checked second,
+    because that is where the assignment download lands and it is convenient to
+    work against it directly.
+    """
+    candidates = [
+        os.path.join(HERE, "..", "docs", "purelane-homepage.html"),
+        os.path.join(HERE, "..", "..", "purelane-homepage.html"),
+        os.path.join(HERE, "..", "purelane-homepage.html"),
+    ]
+    for path in candidates:
+        path = os.path.abspath(path)
+        if os.path.exists(path):
+            return path
+    sys.exit(
+        "Could not find purelane-homepage.html. Looked in:\n  "
+        + "\n  ".join(os.path.abspath(c) for c in candidates)
+    )
+
+
+PROTO = find_prototype()
 HEIGHT = 1600
 
 # prototype art key -> product handle it belongs on.
