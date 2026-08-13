@@ -37,10 +37,30 @@
 
             {%- case block.type -%}
               {%- when 'menu' -%}
+                {%- comment -%}
+                  A real navigation menu wins whenever one is picked, so a
+                  merchant edits Navigation rather than the theme. But a fresh
+                  install has no menus beyond main-menu and footer, which left
+                  these columns rendering a heading over nothing. The fallback
+                  list keeps the footer complete out of the box, one
+                  "Label | /url" per line.
+                {%- endcomment -%}
                 {%- if block.settings.menu != blank -%}
                   <ul>
                     {%- for link in block.settings.menu.links -%}
                       <li><a href="{{ link.url }}">{{ link.title }}</a></li>
+                    {%- endfor -%}
+                  </ul>
+                {%- elsif block.settings.fallback_links != blank -%}
+                  <ul>
+                    {%- assign rows = block.settings.fallback_links | newline_to_br | split: '<br />' -%}
+                    {%- for row in rows -%}
+                      {%- assign parts = row | strip | split: '|' -%}
+                      {%- assign label = parts[0] | strip -%}
+                      {%- assign url = parts[1] | strip | default: '#' -%}
+                      {%- if label != blank -%}
+                        <li><a href="{{ url }}">{{ label }}</a></li>
+                      {%- endif -%}
                     {%- endfor -%}
                   </ul>
                 {%- endif -%}
@@ -68,6 +88,18 @@
               <a href="{{ link.url }}">{{ link.title }}</a>{% unless forloop.last %} · {% endunless %}
             {%- endfor -%}
           </span>
+        {%- elsif section.settings.policy_fallback != blank -%}
+          {%- comment -%}
+            Same reason as the link columns: a store with no policies published
+            has no footer menu to point at, and the design's bottom rule reads
+            wrong with one half of it missing.
+          {%- endcomment -%}
+          <span>
+            {%- assign rows = section.settings.policy_fallback | split: ',' -%}
+            {%- for row in rows -%}
+              {{ row | strip }}{% unless forloop.last %} · {% endunless %}
+            {%- endfor -%}
+          </span>
         {%- endif -%}
       </div>
     </div>
@@ -88,7 +120,13 @@
       "default": "Effective cleaning, powered by nature. Made for Indian homes since day one."
     },
     { "type": "text", "id": "legal_name", "label": "Legal name", "default": "Purelane Eco Products Private Limited" },
-    { "type": "link_list", "id": "policy_menu", "label": "Policy menu", "default": "footer" },
+    { "type": "link_list", "id": "policy_menu", "label": "Policy menu" },
+    {
+      "type": "text",
+      "id": "policy_fallback",
+      "label": "Policy line (used when no policy menu is picked)",
+      "default": "Privacy, Terms, Refunds, Contact"
+    },
     { "type": "range", "id": "scene_depth", "label": "Background depth", "min": 1, "max": 4, "step": 1, "default": 4 }
   ],
   "blocks": [
@@ -97,7 +135,13 @@
       "name": "Link column",
       "settings": [
         { "type": "text", "id": "heading", "label": "Heading", "default": "Shop" },
-        { "type": "link_list", "id": "menu", "label": "Menu" }
+        { "type": "link_list", "id": "menu", "label": "Menu" },
+        {
+          "type": "textarea",
+          "id": "fallback_links",
+          "label": "Links (used when no menu is picked)",
+          "info": "One per line, as  Label | /url"
+        }
       ]
     },
     {
@@ -115,8 +159,20 @@
     {
       "name": "Purelane footer",
       "blocks": [
-        { "type": "menu", "settings": { "heading": "Shop" } },
-        { "type": "menu", "settings": { "heading": "About" } },
+        {
+          "type": "menu",
+          "settings": {
+            "heading": "Shop",
+            "fallback_links": "Bestsellers | #shop\nKitchen | #shop\nLaundry | #shop\nHome | #shop\nSkin | #shop\nStarter kits | #bundles"
+          }
+        },
+        {
+          "type": "menu",
+          "settings": {
+            "heading": "About",
+            "fallback_links": "How it works | #how\nSustainability | #ingredients\nFAQs | #proof\nReviews | #reviews"
+          }
+        },
         { "type": "contact" }
       ]
     }

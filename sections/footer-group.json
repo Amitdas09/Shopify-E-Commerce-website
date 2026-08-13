@@ -5,8 +5,20 @@
     "purelane_footer": {
       "type": "purelane-footer",
       "blocks": {
-        "shop": { "type": "menu", "settings": { "heading": "Shop", "menu": "main-menu" } },
-        "about": { "type": "menu", "settings": { "heading": "About", "menu": "footer" } },
+        "shop": {
+          "type": "menu",
+          "settings": {
+            "heading": "Shop",
+            "fallback_links": "Bestsellers | #shop\nKitchen | #shop\nLaundry | #shop\nHome | #shop\nSkin | #shop\nStarter kits | #bundles"
+          }
+        },
+        "about": {
+          "type": "menu",
+          "settings": {
+            "heading": "About",
+            "fallback_links": "How it works | #how\nSustainability | #ingredients\nFAQs | #proof\nReviews | #reviews"
+          }
+        },
         "contact": {
           "type": "contact",
           "settings": {
@@ -23,7 +35,7 @@
         "tagline": "Clean, simply",
         "blurb": "Effective cleaning, powered by nature. Made for Indian homes since day one.",
         "legal_name": "Purelane Eco Products Private Limited",
-        "policy_menu": "footer",
+        "policy_fallback": "Privacy, Terms, Refunds, Contact",
         "scene_depth": 4
       }
     },
