@@ -55,9 +55,15 @@
             assign price = tier_product.price
             assign compare = tier_product.compare_at_price
 
+            # Whole currency units, floored, as the design shows it: 349 over
+            # two products reads "Flat ₹174", not "Flat ₹174.50". A per-unit
+            # figure is a rough guide to the saving, and carrying cents into it
+            # implies a precision the bundle price does not have. Liquid's
+            # divided_by floors on integers, which is the rounding we want —
+            # the quoted figure can never overstate the real per-item cost.
             assign per_unit = 0
             if price > 0 and qty > 0
-              assign per_unit = price | divided_by: qty
+              assign per_unit = price | divided_by: qty | divided_by: 100 | times: 100
             endif
 
             assign delay = forloop.index0
@@ -100,7 +106,7 @@
               </p>
 
               {%- if per_unit > 0 -%}
-                <p class="per">Flat {{ per_unit | money }} per product</p>
+                <p class="per">Flat {{ per_unit | money_without_trailing_zeros }} per product</p>
               {%- endif -%}
             {%- endif -%}
 

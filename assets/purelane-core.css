@@ -29,6 +29,28 @@
       clobbered by a late second copy of `.purelane .glass-2`, because there
       is no second copy. */
 
+/* The reset the prototype had and this build did not.
+
+   The prototype opened with `* { box-sizing: border-box; margin: 0; padding: 0 }`
+   and every rule after it was written on that footing: a rule only names a
+   margin where it wants one. Porting the rules without the reset left Dawn's
+   own element defaults showing through anywhere we were silent — most visibly
+   in the bundle tiers, where `<p class="qty">` and `<p class="per">` each
+   picked up a bottom margin and pushed the card half a screen taller than the
+   design.
+
+   :where() holds this at zero specificity, so it can only ever fill a gap:
+   any Purelane rule that does name a margin still wins, and so does anything
+   a merchant sets in the editor. Scoped to .purelane so no Dawn page changes. */
+.purelane :where(h1, h2, h3, h4, h5, h6, p, figure, blockquote, dl, dd, ul, ol, li) {
+  margin: 0;
+  padding: 0;
+}
+
+.purelane :where(ul, ol) {
+  list-style: none;
+}
+
 .purelane {
   --ink: #f4f0fb;
   --deep: #e2daf3;

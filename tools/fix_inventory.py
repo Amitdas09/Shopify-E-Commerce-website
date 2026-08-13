@@ -1,59 +1,88 @@
 """
-Make the seeded catalogue actually purchasable on the storefront.
+Put real inventory behind the products, from tools/seed-products.csv.
 
-The CSV import writes Variant Inventory Qty, and the Admin API duly reports
-availableForSale: true — but the storefront disagreed and every product rendered
-"Sold out", including on Dawn's own product template. The quantities exist
-without an inventory level at a location the Online Store can fulfil from, and
-the storefront only counts stock it can actually ship.
+The CSV asks for `shopify` as the inventory tracker on every variant, with
+per-product quantities and `deny` as the policy — so that
+washing-machine-cleaner, seeded at 0, is a genuinely sold-out product and the
+rest are genuinely buyable. That is the edge case the brief asks for: the card
+has to render an out-of-stock state driven by real Shopify inventory, not by a
+hardcoded flag.
 
-Correcting the levels needs write_inventory, which the seeding token does not
-carry. Turning tracking off is the honest alternative: plenty of real merchants
-do not track inventory, an untracked variant is always purchasable, and it keeps
-the demo catalogue behaving like a catalogue.
+Shopify's CSV importer did not apply the tracker column. Every variant landed
+untracked, which makes the quantities decorative — Shopify neither decrements
+them nor blocks a sale. This turns tracking on, sets the policy, and writes the
+CSV quantity to the store's location.
 
-washing-machine-cleaner stays tracked at zero with policy DENY, because "one
-product sold out" is one of the three cases the brief requires.
+Usage:
+  SHOPIFY_STORE=... SHOPIFY_TOKEN=... python tools/fix_inventory.py
+  --dry to print the plan without writing
 
-Usage: SHOPIFY_STORE=... SHOPIFY_TOKEN=... python tools/fix_inventory.py
+Needs read_inventory and write_inventory on the custom app, plus the usual
+read_products / write_products.
 """
 
+import argparse
+import csv
 import json
 import os
 import sys
+import urllib.error
 import urllib.request
 
-STORE = os.environ.get("SHOPIFY_STORE", "").strip()
+sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+CSV_PATH = os.path.join(HERE, "seed-products.csv")
+API = "2025-01"
+
+STORE = os.environ.get("SHOPIFY_STORE", "").strip().replace("https://", "").rstrip("/")
 TOKEN = os.environ.get("SHOPIFY_TOKEN", "").strip()
 if not STORE or not TOKEN:
     sys.exit("Set SHOPIFY_STORE and SHOPIFY_TOKEN.")
 
-KEEP_TRACKED = {"washing-machine-cleaner"}
-
 
 def call(query, variables=None):
     req = urllib.request.Request(
-        "https://%s/admin/api/2025-01/graphql.json" % STORE,
+        "https://%s/admin/api/%s/graphql.json" % (STORE, API),
         data=json.dumps({"query": query, "variables": variables or {}}).encode(),
         headers={"Content-Type": "application/json", "X-Shopify-Access-Token": TOKEN},
     )
-    with urllib.request.urlopen(req, timeout=60) as resp:
-        payload = json.loads(resp.read())
+    try:
+        with urllib.request.urlopen(req, timeout=45) as r:
+            payload = json.loads(r.read())
+    except urllib.error.HTTPError as e:
+        sys.exit("HTTP %s\n%s" % (e.code, e.read().decode(errors="replace")[:400]))
     if "errors" in payload:
-        raise SystemExit(json.dumps(payload["errors"], indent=2))
+        sys.exit(json.dumps(payload["errors"], indent=2))
     return payload["data"]
 
 
-PRODUCTS = """
-query { products(first: 100) { edges { node { id handle
-  variants(first: 5) { edges { node { id inventoryItem { id tracked } } } }
-} } } }
+LOCATIONS = "{ locations(first: 5) { nodes { id } } }"
+
+PRODUCT = """
+query($handle: String!) {
+  productByHandle(handle: $handle) {
+    id title
+    variants(first: 10) {
+      nodes { id inventoryPolicy inventoryItem { id tracked } }
+    }
+  }
+}
 """
 
-UPDATE = """
-mutation Untrack($productId: ID!, $variants: [ProductVariantsBulkInput!]!) {
+SET_VARIANT = """
+mutation($productId: ID!, $variants: [ProductVariantsBulkInput!]!) {
   productVariantsBulkUpdate(productId: $productId, variants: $variants) {
-    productVariants { id }
+    productVariants { id inventoryPolicy inventoryItem { tracked } }
+    userErrors { field message }
+  }
+}
+"""
+
+SET_QUANTITIES = """
+mutation($input: InventorySetQuantitiesInput!) {
+  inventorySetQuantities(input: $input) {
+    inventoryAdjustmentGroup { reason }
     userErrors { field message }
   }
 }
@@ -61,35 +90,80 @@ mutation Untrack($productId: ID!, $variants: [ProductVariantsBulkInput!]!) {
 
 
 def main():
-    data = call(PRODUCTS)
-    changed = kept = failed = 0
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--dry", action="store_true", help="print the plan, write nothing")
+    args = ap.parse_args()
 
-    for edge in data["products"]["edges"]:
-        node = edge["node"]
-        handle = node["handle"]
+    locs = call(LOCATIONS)["locations"]["nodes"]
+    if not locs:
+        sys.exit("This store has no locations — inventory cannot be stocked anywhere.")
+    location_id = locs[0]["id"]
+    print("location: %s%s\n" % (location_id, "  (+%d more, using the first)"
+                                % (len(locs) - 1) if len(locs) > 1 else ""))
 
-        if handle in KEEP_TRACKED:
-            print("  %-34s left tracked at 0 (the sold-out case)" % handle)
-            kept += 1
+    rows = list(csv.DictReader(open(CSV_PATH, encoding="utf-8")))
+    done = failed = 0
+
+    for row in rows:
+        handle = row["Handle"].strip()
+        if not handle:
+            continue
+        qty = int(row["Variant Inventory Qty"] or 0)
+        policy = (row["Variant Inventory Policy"] or "deny").strip().upper()
+        tracked = (row["Variant Inventory Tracker"] or "").strip().lower() == "shopify"
+
+        if args.dry:
+            print("  %-32s qty=%-4d policy=%-8s tracked=%s" % (handle, qty, policy, tracked))
             continue
 
-        variants = [{"id": v["node"]["id"], "inventoryItem": {"tracked": False}}
-                    for v in node["variants"]["edges"]]
-        if not variants:
-            continue
-
-        res = call(UPDATE, {"productId": node["id"], "variants": variants})
-        errs = res["productVariantsBulkUpdate"].get("userErrors") or []
-        if errs:
-            print("  %-34s FAILED  %s" % (handle, errs[0]["message"]))
+        product = call(PRODUCT, {"handle": handle}).get("productByHandle")
+        if not product:
+            print("  !  %-32s not found" % handle)
             failed += 1
-        else:
-            print("  %-34s tracking off -> purchasable" % handle)
-            changed += 1
+            continue
 
-    print("\nuntracked %d, left tracked %d, failed %d" % (changed, kept, failed))
-    return 1 if failed else 0
+        variants = product["variants"]["nodes"]
+
+        result = call(SET_VARIANT, {
+            "productId": product["id"],
+            "variants": [{
+                "id": v["id"],
+                "inventoryPolicy": policy,
+                "inventoryItem": {"tracked": tracked},
+            } for v in variants],
+        })
+        errs = result["productVariantsBulkUpdate"]["userErrors"]
+        if errs:
+            print("  !  %-32s variant: %s" % (handle, errs))
+            failed += 1
+            continue
+
+        if tracked:
+            # setQuantities is absolute, not a delta, so re-running is safe and
+            # lands on the CSV figure whatever the store drifted to.
+            result = call(SET_QUANTITIES, {"input": {
+                "name": "available",
+                "reason": "correction",
+                "ignoreCompareQuantity": True,
+                "quantities": [{
+                    "inventoryItemId": v["inventoryItem"]["id"],
+                    "locationId": location_id,
+                    "quantity": qty,
+                } for v in variants],
+            }})
+            errs = result["inventorySetQuantities"]["userErrors"]
+            if errs:
+                print("  !  %-32s quantity: %s" % (handle, errs))
+                failed += 1
+                continue
+
+        state = "SOLD OUT" if (tracked and qty == 0 and policy == "DENY") else "buyable"
+        print("  ok %-32s %-4d  %-8s  %s" % (handle, qty, policy, state))
+        done += 1
+
+    if not args.dry:
+        print("\n%d updated, %d failed" % (done, failed))
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    main()
