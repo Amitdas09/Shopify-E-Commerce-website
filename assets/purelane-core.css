@@ -12,426 +12,426 @@
    --accent stays exactly as designed for borders, rings and fills.
    ========================================================================== */
 
-/* Cascade layers, not source order.
+/* Ordering, not layers.
 
-   Every section requests purelane-core.css so it can stand alone, which means
-   the browser sees the same base rules once per section on the page. Source
-   order then decides the winner between two rules of equal specificity — and
-   the *last* copy of core.css sits after the first section's own stylesheet.
-   That is how `.purelane .glass-2 { position: relative }` silently beat
-   `.purelane-hero .badges { position: absolute }` and dropped the hero badge
-   rail out of position.
+   This file is emitted exactly once, from layout/theme.liquid, immediately
+   after Dawn's base.css. Two things follow, and both matter:
 
-   Layer order is fixed by the first @layer statement and is immune to how many
-   times either file is emitted or in what order. */
+   1. It sits *after* Dawn, so equal-specificity collisions with Dawn's own
+      element typography (h1..h6, p, a) resolve our way without needing a
+      layer — and without the trap that unlayered CSS beats layered CSS at
+      any specificity, which is what hid the ambient backdrop and flattened
+      the section headings.
 
-@layer purelane-base, purelane-section;
+   2. Per-section stylesheets stay with their sections in the <body>, which
+      the parser reaches after the <head>, so they still win over these base
+      rules. `.purelane-hero .badges { position: absolute }` can no longer be
+      clobbered by a late second copy of `.purelane .glass-2`, because there
+      is no second copy. */
 
-@layer purelane-base {
+.purelane {
+  --ink: #f4f0fb;
+  --deep: #e2daf3;
+  --brand: #4b3a8f;
+  --brand-lt: #6b55b8;
+  --paper: #241a3d;
+  --paper-2: rgba(36, 26, 61, 0.78);
+  --paper-3: rgba(36, 26, 61, 0.56);
+  --accent: #b8701c;
+  --accent-2: #c9761d;
+  --accent-ink: #8f560f;
+  --leaf: #4f7d10;
+  --leaf-ink: #4a760f;
+  --leaf-2: #5f7d18;
+  --surface: #17102b;
+
+  --g-bg: linear-gradient(158deg, rgba(255, 255, 255, 0.8), rgba(236, 230, 247, 0.56) 58%, rgba(222, 212, 240, 0.5));
+  --g-line: rgba(75, 58, 143, 0.16);
+  --g-shadow: 0 22px 54px rgba(58, 44, 112, 0.13);
+  --g-inset: inset 0 1px 0 rgba(255, 255, 255, 0.92);
+
+  --btn-fill: linear-gradient(135deg, #00706a, #004b46);
+  --btn-fill-ink: #f4fdf6;
+  --btn-ghost-ink: #01423b;
+
+  --purelane-display-font: 'Outfit', ui-sans-serif, system-ui, sans-serif;
+  --purelane-body-font: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+
+  --r: 26px;
+  --r-sm: 16px;
+  --maxw: 1180px;
+  --sec-y: 34px;
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+
+  position: relative;
+  z-index: 2;
+  color: var(--paper);
+  font-family: var(--purelane-body-font, 'Inter', system-ui, -apple-system, sans-serif);
+  line-height: 1.62;
+  -webkit-font-smoothing: antialiased;
+}
+
+@media (max-width: 760px) {
   .purelane {
-    --ink: #f4f0fb;
-    --deep: #e2daf3;
-    --brand: #4b3a8f;
-    --brand-lt: #6b55b8;
-    --paper: #241a3d;
-    --paper-2: rgba(36, 26, 61, 0.78);
-    --paper-3: rgba(36, 26, 61, 0.56);
-    --accent: #b8701c;
-    --accent-2: #c9761d;
-    --accent-ink: #8f560f;
-    --leaf: #4f7d10;
-    --leaf-ink: #4a760f;
-    --leaf-2: #5f7d18;
-    --surface: #17102b;
-
-    --g-bg: linear-gradient(158deg, rgba(255, 255, 255, 0.8), rgba(236, 230, 247, 0.56) 58%, rgba(222, 212, 240, 0.5));
-    --g-line: rgba(75, 58, 143, 0.16);
-    --g-shadow: 0 22px 54px rgba(58, 44, 112, 0.13);
-    --g-inset: inset 0 1px 0 rgba(255, 255, 255, 0.92);
-
-    --btn-fill: linear-gradient(135deg, #00706a, #004b46);
-    --btn-fill-ink: #f4fdf6;
-    --btn-ghost-ink: #01423b;
-
-    --purelane-display-font: 'Outfit', ui-sans-serif, system-ui, sans-serif;
-    --purelane-body-font: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
-
-    --r: 26px;
-    --r-sm: 16px;
-    --maxw: 1180px;
-    --sec-y: 34px;
-    --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
-
-    position: relative;
-    z-index: 2;
-    color: var(--paper);
-    font-family: var(--purelane-body-font, 'Inter', system-ui, -apple-system, sans-serif);
-    line-height: 1.62;
-    -webkit-font-smoothing: antialiased;
+    --sec-y: 22px;
   }
+}
 
-  @media (max-width: 760px) {
-    .purelane {
-      --sec-y: 22px;
-    }
+.purelane *,
+.purelane *::before,
+.purelane *::after {
+  box-sizing: border-box;
+}
+
+.purelane img,
+.purelane svg {
+  display: block;
+  max-width: 100%;
+}
+
+.purelane a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.purelane :focus-visible {
+  outline: 2px solid var(--leaf);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+/* ---------- type ---------- */
+
+.purelane .d1,
+.purelane .d2,
+.purelane .d3,
+.purelane .d4 {
+  font-family: var(--purelane-display-font, 'Outfit', system-ui, sans-serif);
+  text-transform: uppercase;
+  letter-spacing: -0.018em;
+  font-weight: 800;
+  line-height: 0.87;
+  color: var(--surface);
+}
+
+.purelane .d1 { font-size: clamp(48px, 8.6vw, 112px); }
+.purelane .d2 { font-size: clamp(30px, 4.6vw, 54px); line-height: 0.94; }
+.purelane .d3 { font-size: clamp(21px, 2.5vw, 30px); line-height: 1.04; font-weight: 700; letter-spacing: -0.01em; }
+.purelane .d4 { font-size: clamp(16px, 1.6vw, 19px); line-height: 1.14; font-weight: 700; letter-spacing: 0.005em; }
+
+@media (max-width: 760px) {
+  .purelane .d1 { font-size: clamp(44px, 13.5vw, 64px); }
+}
+
+.purelane .lime { color: var(--accent-ink); }
+
+.purelane .lede {
+  font-size: clamp(15px, 1.35vw, 17.5px);
+  color: var(--paper-2);
+  max-width: 44ch;
+}
+
+.purelane .body-s {
+  font-size: 14.5px;
+  color: var(--paper-2);
+  line-height: 1.66;
+}
+
+.purelane .kicker {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--paper-3);
+}
+
+.purelane .wrap {
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: 0 18px;
+}
+
+/* ---------- section shell ---------- */
+
+.purelane-section {
+  position: relative;
+  padding-top: var(--pl-pt, var(--sec-y));
+  padding-bottom: var(--pl-pb, var(--sec-y));
+}
+
+/* Below 760px the design tightens the rhythm to 22px. Merchant padding values
+   are scaled by the same ratio rather than ignored, so a custom value still
+   reads as "tighter on mobile" instead of jumping back to the desktop figure. */
+@media (max-width: 760px) {
+  .purelane-section {
+    padding-top: calc(var(--pl-pt, var(--sec-y)) * 0.65);
+    padding-bottom: calc(var(--pl-pb, var(--sec-y)) * 0.65);
   }
+}
 
+.purelane .sec-pad { padding: clamp(26px, 3.4vw, 40px); }
+
+@media (max-width: 760px) {
+  .purelane .sec-pad { padding: 22px 18px; }
+}
+
+.purelane .panel-head {
+  text-align: center;
+  margin-bottom: 26px;
+}
+
+.purelane .panel-head .d2 { margin-bottom: 12px; }
+.purelane .panel-head .kicker + .d2 { margin-top: 12px; }
+.purelane .panel-head .lede { margin: 14px auto 0; }
+
+.purelane .rule {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  margin: 0 0 20px;
+  max-width: 270px;
+}
+
+.purelane .rule i {
+  height: 1px;
+  flex: 1;
+  background: linear-gradient(90deg, rgba(75, 58, 143, 0.34), transparent);
+}
+
+.purelane .rule svg {
+  width: 16px;
+  height: 16px;
+  color: var(--accent);
+  flex: 0 0 auto;
+}
+
+.purelane .panel-head .rule {
+  margin: 0 auto;
+  justify-content: center;
+  max-width: 240px;
+}
+
+.purelane .panel-head .rule i:first-child {
+  background: linear-gradient(90deg, transparent, rgba(75, 58, 143, 0.34));
+}
+
+/* ---------- glass ---------- */
+
+.purelane .glass {
+  background: var(--g-bg);
+  backdrop-filter: blur(24px) saturate(150%);
+  -webkit-backdrop-filter: blur(24px) saturate(150%);
+  border: 1px solid var(--g-line);
+  border-radius: var(--r);
+  box-shadow: var(--g-shadow), var(--g-inset);
+  position: relative;
+  overflow: hidden;
+}
+
+.purelane .glass::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background: linear-gradient(115deg, rgba(255, 255, 255, 0.55), transparent 32%, transparent 74%, rgba(201, 118, 29, 0.06));
+}
+
+.purelane .glass-2 {
+  background: linear-gradient(158deg, rgba(255, 255, 255, 0.66), rgba(236, 230, 247, 0.44));
+  backdrop-filter: blur(18px) saturate(135%);
+  -webkit-backdrop-filter: blur(18px) saturate(135%);
+  border: 1px solid rgba(75, 58, 143, 0.13);
+  border-radius: var(--r);
+  box-shadow: 0 16px 38px rgba(58, 44, 112, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.86);
+  position: relative;
+  overflow: hidden;
+}
+
+@media (max-width: 760px) {
+  .purelane .glass {
+    backdrop-filter: blur(16px) saturate(140%);
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
+  }
+  .purelane .glass-2 {
+    backdrop-filter: blur(12px) saturate(130%);
+    -webkit-backdrop-filter: blur(12px) saturate(130%);
+  }
+}
+
+/* ---------- buttons ---------- */
+
+.purelane .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  height: 46px;
+  padding: 0 22px;
+  border-radius: 999px;
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.35s var(--ease), box-shadow 0.35s var(--ease), background 0.35s var(--ease);
+}
+
+.purelane .btn svg {
+  width: 15px;
+  height: 15px;
+  flex: 0 0 auto;
+}
+
+.purelane .btn-primary {
+  background: var(--btn-fill);
+  color: var(--btn-fill-ink);
+  box-shadow: 0 12px 26px rgba(0, 80, 74, 0.26), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+
+.purelane .btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 36px rgba(0, 80, 74, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.28);
+}
+
+.purelane .btn-ghost {
+  background: rgba(255, 255, 255, 0.66);
+  border: 1px solid rgba(75, 58, 143, 0.22);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: var(--btn-ghost-ink);
+}
+
+.purelane .btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.9);
+  transform: translateY(-2px);
+}
+
+.purelane .btn-sm {
+  height: 38px;
+  padding: 0 18px;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+}
+
+.purelane .btn[disabled],
+.purelane .btn[aria-disabled="true"] {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* ---------- reveal ----------
+   .rv starts hidden only once JS has confirmed it can reveal it again.
+   Without the .purelane-js gate a script failure would leave the whole
+   page invisible, which is how the prototype behaved. */
+
+.purelane-js .purelane .rv {
+  opacity: 0;
+  transform: translateY(18px);
+  /* The prototype also animated filter: blur(7px) across the same 0.95s.
+     Blur cannot be composited, so every frame of every reveal repainted the
+     element and everything beneath it — including four full-viewport
+     blend-mode backdrop layers. That is the laboured, arrives-late feel.
+     Opacity and transform are GPU-composited, so the same gesture now costs
+     nothing and lands in well under half the time. */
+  transition: opacity 0.42s var(--ease), transform 0.42s var(--ease);
+  will-change: opacity, transform;
+}
+
+.purelane-js .purelane .rv.in {
+  opacity: 1;
+  transform: none;
+  /* Release the compositor layer once the reveal is done; leaving will-change
+     on permanently keeps a layer per element for the life of the page. */
+  will-change: auto;
+}
+
+.purelane .rv-d1 { transition-delay: 0.05s; }
+.purelane .rv-d2 { transition-delay: 0.10s; }
+.purelane .rv-d3 { transition-delay: 0.15s; }
+.purelane .rv-d4 { transition-delay: 0.20s; }
+.purelane .rv-d5 { transition-delay: 0.25s; }
+
+/* ---------- shared price + rating atoms ---------- */
+
+.purelane .p-rating {
+  font-size: 11.5px;
+  color: var(--paper-2);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.purelane .p-rating b {
+  color: var(--accent-ink);
+  font-weight: 700;
+}
+
+.purelane .p-stars {
+  color: var(--leaf-2);
+  letter-spacing: 0.2em;
+  font-size: 12px;
+}
+
+.purelane .p-price {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.purelane .p-price strong {
+  font-family: var(--purelane-display-font, 'Outfit', sans-serif);
+  font-size: 18px;
+  color: var(--surface);
+  font-weight: 700;
+}
+
+.purelane .p-price s {
+  font-size: 12px;
+  color: var(--paper-3);
+}
+
+.purelane .p-price em {
+  font-style: normal;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--accent-ink);
+}
+
+.purelane .visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------- motion preferences ---------- */
+
+@media (prefers-reduced-motion: reduce) {
   .purelane *,
   .purelane *::before,
   .purelane *::after {
-    box-sizing: border-box;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
-
-  .purelane img,
-  .purelane svg {
-    display: block;
-    max-width: 100%;
-  }
-
-  .purelane a {
-    color: inherit;
-    text-decoration: none;
-  }
-
-  .purelane :focus-visible {
-    outline: 2px solid var(--leaf);
-    outline-offset: 3px;
-    border-radius: 6px;
-  }
-
-  /* ---------- type ---------- */
-
-  .purelane .d1,
-  .purelane .d2,
-  .purelane .d3,
-  .purelane .d4 {
-    font-family: var(--purelane-display-font, 'Outfit', system-ui, sans-serif);
-    text-transform: uppercase;
-    letter-spacing: -0.018em;
-    font-weight: 800;
-    line-height: 0.87;
-    color: var(--surface);
-  }
-
-  .purelane .d1 { font-size: clamp(48px, 8.6vw, 112px); }
-  .purelane .d2 { font-size: clamp(30px, 4.6vw, 54px); line-height: 0.94; }
-  .purelane .d3 { font-size: clamp(21px, 2.5vw, 30px); line-height: 1.04; font-weight: 700; letter-spacing: -0.01em; }
-  .purelane .d4 { font-size: clamp(16px, 1.6vw, 19px); line-height: 1.14; font-weight: 700; letter-spacing: 0.005em; }
-
-  @media (max-width: 760px) {
-    .purelane .d1 { font-size: clamp(44px, 13.5vw, 64px); }
-  }
-
-  .purelane .lime { color: var(--accent-ink); }
-
-  .purelane .lede {
-    font-size: clamp(15px, 1.35vw, 17.5px);
-    color: var(--paper-2);
-    max-width: 44ch;
-  }
-
-  .purelane .body-s {
-    font-size: 14.5px;
-    color: var(--paper-2);
-    line-height: 1.66;
-  }
-
-  .purelane .kicker {
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-    color: var(--paper-3);
-  }
-
-  .purelane .wrap {
-    max-width: var(--maxw);
-    margin: 0 auto;
-    padding: 0 18px;
-  }
-
-  /* ---------- section shell ---------- */
-
-  .purelane-section {
-    position: relative;
-    padding-top: var(--pl-pt, var(--sec-y));
-    padding-bottom: var(--pl-pb, var(--sec-y));
-  }
-
-  /* Below 760px the design tightens the rhythm to 22px. Merchant padding values
-     are scaled by the same ratio rather than ignored, so a custom value still
-     reads as "tighter on mobile" instead of jumping back to the desktop figure. */
-  @media (max-width: 760px) {
-    .purelane-section {
-      padding-top: calc(var(--pl-pt, var(--sec-y)) * 0.65);
-      padding-bottom: calc(var(--pl-pb, var(--sec-y)) * 0.65);
-    }
-  }
-
-  .purelane .sec-pad { padding: clamp(26px, 3.4vw, 40px); }
-
-  @media (max-width: 760px) {
-    .purelane .sec-pad { padding: 22px 18px; }
-  }
-
-  .purelane .panel-head {
-    text-align: center;
-    margin-bottom: 26px;
-  }
-
-  .purelane .panel-head .d2 { margin-bottom: 12px; }
-  .purelane .panel-head .kicker + .d2 { margin-top: 12px; }
-  .purelane .panel-head .lede { margin: 14px auto 0; }
-
-  .purelane .rule {
-    display: flex;
-    align-items: center;
-    gap: 13px;
-    margin: 0 0 20px;
-    max-width: 270px;
-  }
-
-  .purelane .rule i {
-    height: 1px;
-    flex: 1;
-    background: linear-gradient(90deg, rgba(75, 58, 143, 0.34), transparent);
-  }
-
-  .purelane .rule svg {
-    width: 16px;
-    height: 16px;
-    color: var(--accent);
-    flex: 0 0 auto;
-  }
-
-  .purelane .panel-head .rule {
-    margin: 0 auto;
-    justify-content: center;
-    max-width: 240px;
-  }
-
-  .purelane .panel-head .rule i:first-child {
-    background: linear-gradient(90deg, transparent, rgba(75, 58, 143, 0.34));
-  }
-
-  /* ---------- glass ---------- */
-
-  .purelane .glass {
-    background: var(--g-bg);
-    backdrop-filter: blur(24px) saturate(150%);
-    -webkit-backdrop-filter: blur(24px) saturate(150%);
-    border: 1px solid var(--g-line);
-    border-radius: var(--r);
-    box-shadow: var(--g-shadow), var(--g-inset);
-    position: relative;
-    overflow: hidden;
-  }
-
-  .purelane .glass::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    border-radius: inherit;
-    background: linear-gradient(115deg, rgba(255, 255, 255, 0.55), transparent 32%, transparent 74%, rgba(201, 118, 29, 0.06));
-  }
-
-  .purelane .glass-2 {
-    background: linear-gradient(158deg, rgba(255, 255, 255, 0.66), rgba(236, 230, 247, 0.44));
-    backdrop-filter: blur(18px) saturate(135%);
-    -webkit-backdrop-filter: blur(18px) saturate(135%);
-    border: 1px solid rgba(75, 58, 143, 0.13);
-    border-radius: var(--r);
-    box-shadow: 0 16px 38px rgba(58, 44, 112, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.86);
-    position: relative;
-    overflow: hidden;
-  }
-
-  @media (max-width: 760px) {
-    .purelane .glass {
-      backdrop-filter: blur(16px) saturate(140%);
-      -webkit-backdrop-filter: blur(16px) saturate(140%);
-    }
-    .purelane .glass-2 {
-      backdrop-filter: blur(12px) saturate(130%);
-      -webkit-backdrop-filter: blur(12px) saturate(130%);
-    }
-  }
-
-  /* ---------- buttons ---------- */
-
-  .purelane .btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    height: 46px;
-    padding: 0 22px;
-    border-radius: 999px;
-    font-family: inherit;
-    font-size: 12.5px;
-    font-weight: 700;
-    letter-spacing: 0.13em;
-    text-transform: uppercase;
-    white-space: nowrap;
-    border: none;
-    cursor: pointer;
-    transition: transform 0.35s var(--ease), box-shadow 0.35s var(--ease), background 0.35s var(--ease);
-  }
-
-  .purelane .btn svg {
-    width: 15px;
-    height: 15px;
-    flex: 0 0 auto;
-  }
-
-  .purelane .btn-primary {
-    background: var(--btn-fill);
-    color: var(--btn-fill-ink);
-    box-shadow: 0 12px 26px rgba(0, 80, 74, 0.26), inset 0 1px 0 rgba(255, 255, 255, 0.22);
-  }
-
-  .purelane .btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 18px 36px rgba(0, 80, 74, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.28);
-  }
-
-  .purelane .btn-ghost {
-    background: rgba(255, 255, 255, 0.66);
-    border: 1px solid rgba(75, 58, 143, 0.22);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    color: var(--btn-ghost-ink);
-  }
-
-  .purelane .btn-ghost:hover {
-    background: rgba(255, 255, 255, 0.9);
-    transform: translateY(-2px);
-  }
-
-  .purelane .btn-sm {
-    height: 38px;
-    padding: 0 18px;
-    font-size: 11px;
-    letter-spacing: 0.14em;
-  }
-
-  .purelane .btn[disabled],
-  .purelane .btn[aria-disabled="true"] {
-    opacity: 0.55;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
-  }
-
-  /* ---------- reveal ----------
-     .rv starts hidden only once JS has confirmed it can reveal it again.
-     Without the .purelane-js gate a script failure would leave the whole
-     page invisible, which is how the prototype behaved. */
 
   .purelane-js .purelane .rv {
-    opacity: 0;
-    transform: translateY(18px);
-    /* The prototype also animated filter: blur(7px) across the same 0.95s.
-       Blur cannot be composited, so every frame of every reveal repainted the
-       element and everything beneath it — including four full-viewport
-       blend-mode backdrop layers. That is the laboured, arrives-late feel.
-       Opacity and transform are GPU-composited, so the same gesture now costs
-       nothing and lands in well under half the time. */
-    transition: opacity 0.42s var(--ease), transform 0.42s var(--ease);
-    will-change: opacity, transform;
-  }
-
-  .purelane-js .purelane .rv.in {
     opacity: 1;
     transform: none;
-    /* Release the compositor layer once the reveal is done; leaving will-change
-       on permanently keeps a layer per element for the life of the page. */
-    will-change: auto;
-  }
-
-  .purelane .rv-d1 { transition-delay: 0.05s; }
-  .purelane .rv-d2 { transition-delay: 0.10s; }
-  .purelane .rv-d3 { transition-delay: 0.15s; }
-  .purelane .rv-d4 { transition-delay: 0.20s; }
-  .purelane .rv-d5 { transition-delay: 0.25s; }
-
-  /* ---------- shared price + rating atoms ---------- */
-
-  .purelane .p-rating {
-    font-size: 11.5px;
-    color: var(--paper-2);
-    display: flex;
-    align-items: center;
-    gap: 5px;
-  }
-
-  .purelane .p-rating b {
-    color: var(--accent-ink);
-    font-weight: 700;
-  }
-
-  .purelane .p-stars {
-    color: var(--leaf-2);
-    letter-spacing: 0.2em;
-    font-size: 12px;
-  }
-
-  .purelane .p-price {
-    display: flex;
-    align-items: baseline;
-    gap: 8px;
-    flex-wrap: wrap;
-  }
-
-  .purelane .p-price strong {
-    font-family: var(--purelane-display-font, 'Outfit', sans-serif);
-    font-size: 18px;
-    color: var(--surface);
-    font-weight: 700;
-  }
-
-  .purelane .p-price s {
-    font-size: 12px;
-    color: var(--paper-3);
-  }
-
-  .purelane .p-price em {
-    font-style: normal;
-    font-size: 10px;
-    font-weight: 800;
-    letter-spacing: 0.08em;
-    color: var(--accent-ink);
-  }
-
-  .purelane .visually-hidden {
-    position: absolute !important;
-    width: 1px;
-    height: 1px;
-    margin: -1px;
-    padding: 0;
-    overflow: hidden;
-    clip: rect(0 0 0 0);
-    clip-path: inset(50%);
-    white-space: nowrap;
-    border: 0;
-  }
-
-  /* ---------- motion preferences ---------- */
-
-  @media (prefers-reduced-motion: reduce) {
-    .purelane *,
-    .purelane *::before,
-    .purelane *::after {
-      animation-duration: 0.01ms !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: 0.01ms !important;
-      scroll-behavior: auto !important;
-    }
-
-    .purelane-js .purelane .rv {
-      opacity: 1;
-      transform: none;
-      filter: none;
-    }
+    filter: none;
   }
 }

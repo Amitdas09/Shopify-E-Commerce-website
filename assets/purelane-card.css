@@ -3,150 +3,146 @@
    Shared by the shop grid and any future section that renders the same object.
    ========================================================================== */
 
-@layer purelane-base, purelane-section;
+.purelane .shelf {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(2, 1fr);
+}
 
-@layer purelane-section {
+@media (min-width: 860px) {
   .purelane .shelf {
-    display: grid;
-    gap: 14px;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(var(--shelf-cols, 4), 1fr);
   }
+}
 
-  @media (min-width: 860px) {
-    .purelane .shelf {
-      grid-template-columns: repeat(var(--shelf-cols, 4), 1fr);
-    }
-  }
+.purelane .card {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.4s var(--ease);
+}
 
-  .purelane .card {
-    padding: 16px;
-    display: flex;
-    flex-direction: column;
-    transition: transform 0.4s var(--ease);
-  }
+.purelane .card:hover {
+  transform: translateY(-5px);
+}
 
+@media (prefers-reduced-motion: reduce) {
   .purelane .card:hover {
-    transform: translateY(-5px);
+    transform: none;
   }
+}
 
-  @media (prefers-reduced-motion: reduce) {
-    .purelane .card:hover {
-      transform: none;
-    }
-  }
+.purelane .card .shot {
+  height: 150px;
+  border-radius: 14px;
+  margin-bottom: 14px;
+  display: grid;
+  place-items: center;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.6), rgba(236, 230, 247, 0.42));
+  border: 1px solid rgba(75, 58, 143, 0.1);
+}
 
+.purelane .card .shot .pl-pimg {
+  height: 122px;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 13px rgba(0, 74, 66, 0.13));
+}
+
+.purelane .card .pill {
+  position: absolute;
+  top: 9px;
+  left: 9px;
+  z-index: 2;
+  font-size: 8.5px;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.86);
+  border: 1px solid rgba(201, 118, 29, 0.34);
+  color: var(--leaf-ink);
+}
+
+.purelane .card .pill--out {
+  border-color: rgba(75, 58, 143, 0.3);
+  color: var(--paper-2);
+}
+
+.purelane .card .card-title {
+  font-family: var(--purelane-display-font, 'Outfit', sans-serif);
+  font-size: 13.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--surface);
+  line-height: 1.2;
+  margin: 0 0 7px;
+  /* A very long product title is a required seed case: it wraps and grows the
+     row rather than overflowing, and .p-price's margin-top:auto keeps every
+     buy button on the same baseline across the row. */
+  overflow-wrap: anywhere;
+}
+
+.purelane .card .card-title a::after {
+  /* Full-card hit area, so the whole tile is clickable without nesting
+     interactive elements inside the link. */
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.purelane .card .p-rating {
+  margin-bottom: 10px;
+}
+
+.purelane .card .p-price {
+  margin-top: auto;
+  margin-bottom: 12px;
+}
+
+.purelane .card .card-form,
+.purelane .card > .btn {
+  position: relative;
+  z-index: 2;
+}
+
+.purelane .card .btn {
+  width: 100%;
+  justify-content: center;
+}
+
+@media (max-width: 760px) {
   .purelane .card .shot {
-    height: 150px;
-    border-radius: 14px;
-    margin-bottom: 14px;
-    display: grid;
-    place-items: center;
-    position: relative;
-    overflow: hidden;
-    background: linear-gradient(160deg, rgba(255, 255, 255, 0.6), rgba(236, 230, 247, 0.42));
-    border: 1px solid rgba(75, 58, 143, 0.1);
+    height: 126px;
   }
-
   .purelane .card .shot .pl-pimg {
-    height: 122px;
-    width: auto;
-    max-width: 100%;
-    object-fit: contain;
-    filter: drop-shadow(0 8px 13px rgba(0, 74, 66, 0.13));
+    height: 108px;
   }
+}
 
-  .purelane .card .pill {
-    position: absolute;
-    top: 9px;
-    left: 9px;
-    z-index: 2;
-    font-size: 8.5px;
-    font-weight: 800;
-    letter-spacing: 0.13em;
-    text-transform: uppercase;
-    padding: 4px 9px;
-    border-radius: 999px;
-    background: rgba(255, 255, 255, 0.86);
-    border: 1px solid rgba(201, 118, 29, 0.34);
-    color: var(--leaf-ink);
-  }
+/* Empty-state art fills the same box a real photo would. */
+.purelane .pl-pimg--empty {
+  display: grid;
+  place-items: center;
+}
 
-  .purelane .card .pill--out {
-    border-color: rgba(75, 58, 143, 0.3);
-    color: var(--paper-2);
-  }
+.purelane .pl-pimg--empty svg {
+  height: 100%;
+  width: auto;
+}
 
-  .purelane .card .card-title {
-    font-family: var(--purelane-display-font, 'Outfit', sans-serif);
-    font-size: 13.5px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
-    color: var(--surface);
-    line-height: 1.2;
-    margin: 0 0 7px;
-    /* A very long product title is a required seed case: it wraps and grows the
-       row rather than overflowing, and .p-price's margin-top:auto keeps every
-       buy button on the same baseline across the row. */
-    overflow-wrap: anywhere;
-  }
+/* ---------- grid empty state ---------- */
 
-  .purelane .card .card-title a::after {
-    /* Full-card hit area, so the whole tile is clickable without nesting
-       interactive elements inside the link. */
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: 1;
-  }
-
-  .purelane .card .p-rating {
-    margin-bottom: 10px;
-  }
-
-  .purelane .card .p-price {
-    margin-top: auto;
-    margin-bottom: 12px;
-  }
-
-  .purelane .card .card-form,
-  .purelane .card > .btn {
-    position: relative;
-    z-index: 2;
-  }
-
-  .purelane .card .btn {
-    width: 100%;
-    justify-content: center;
-  }
-
-  @media (max-width: 760px) {
-    .purelane .card .shot {
-      height: 126px;
-    }
-    .purelane .card .shot .pl-pimg {
-      height: 108px;
-    }
-  }
-
-  /* Empty-state art fills the same box a real photo would. */
-  .purelane .pl-pimg--empty {
-    display: grid;
-    place-items: center;
-  }
-
-  .purelane .pl-pimg--empty svg {
-    height: 100%;
-    width: auto;
-  }
-
-  /* ---------- grid empty state ---------- */
-
-  .purelane .shelf-empty {
-    grid-column: 1 / -1;
-    text-align: center;
-    padding: 32px 18px;
-    color: var(--paper-2);
-    font-size: 14px;
-  }
+.purelane .shelf-empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 32px 18px;
+  color: var(--paper-2);
+  font-size: 14px;
 }
