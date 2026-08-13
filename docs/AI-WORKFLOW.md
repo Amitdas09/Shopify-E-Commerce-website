@@ -21,10 +21,13 @@ script, not retyped — deduplicate the `<defs>`, namespace six ids, add
 `aria-hidden`, write the snippet. Retyping 22KB of path data by hand is how you
 introduce a bug that nobody finds for a month.
 
-**Generating the product art.** The design's bottles are SVG rounded rectangles
-in per-product shades. A script redraws that geometry as raster at 1600px so it
-can be uploaded as real product images. Faster than sourcing photography and
-strictly more accurate, because the bottles *are* the design.
+**Generating the product art.** Sixteen products needed images, and the bottles
+*are* the design — stock photography would have changed how the page looks. Two
+scripts produce them: one decodes the flat silhouettes out of the prototype's
+own base64 SVGs, the other applies its two finished bottle templates across the
+range with each product's label copy. Both rasterise through Chromium at
+1600px and upload over the Admin API. That is an hour of work I would otherwise
+have done badly by hand, and the output is exact rather than approximate.
 
 **Arithmetic I would otherwise have asserted.** Every contrast ratio in
 BUILD-NOTES is computed, not estimated. That is what turned "the accent looks a
