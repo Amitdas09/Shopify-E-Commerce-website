@@ -77,16 +77,38 @@ to exist first or the values have nowhere to land.
 3. Generate the product art and attach it:
 
 ```bash
-python tools/make_product_images.py     # writes tools/seed-images/*.png
+python tools/extract_product_art.py   # flat silhouettes  -> seed-images/flat/
+python tools/make_labelled_art.py     # labelled bottles  -> seed-images/label/
+python tools/replace_product_art.py   # upload both, in that order
 ```
 
-Each file is named for its product handle. Open a product, drag its PNG onto the
-media area. Skip `magic-eraser` — its missing image is the point, and the theme
-renders a branded placeholder that holds the same box.
+Each file is named for its product handle, and the upload order is the contract
+the theme reads: **image 1 is the flat silhouette, image 2 the labelled bottle**.
+Most sections use the first; the shop cards ask for the second. See the note in
+`snippets/purelane-product-image.liquid`.
 
-> The images are redrawn from the prototype's own inline SVG bottles rather than
-> sourced as stock photography. The bottles *are* the design; substituting
-> photographs would change how the page looks.
+`replace_product_art.py` deletes existing media before uploading, so it is safe
+to re-run and will not leave a product holding two versions of the same bottle.
+Afterwards, **delete `magic-eraser`'s media** — its missing image is the point,
+and the theme renders a branded placeholder that holds the same box.
+
+> Both sets are the prototype's own artwork, not stock photography. The flat
+> silhouettes are decoded from the `--p-*` base64 SVGs; the labelled bottles use
+> the two finished templates the shop shelf defines, with each product's label
+> copy. The bottles *are* the design — substituting photographs would change how
+> the page looks.
+
+4. Fix the inventory the CSV importer dropped:
+
+```bash
+python tools/fix_inventory.py
+```
+
+Shopify's importer silently ignores the *Variant Inventory Tracker* column, so
+every variant lands untracked and the seeded quantities are decorative — Shopify
+will neither decrement them nor block a sale. This reads the CSV back as the
+source of truth and sets tracking, policy and quantity over the API, which is
+what makes the sold-out card a real inventory state rather than a flag.
 
 ## 7. Collections
 

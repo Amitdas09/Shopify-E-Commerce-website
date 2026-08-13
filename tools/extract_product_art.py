@@ -1,15 +1,14 @@
 """
 Render the prototype's own bottle artwork to PNGs for upload as product photos.
 
-make_product_images.py redrew the bottles from scratch in Pillow. That was a
-reasonable guess before I looked closely enough: the prototype does not draw its
-bottles inline in the markup at all. Every `.pimg` is a CSS background pointing
-at a `--p-*` custom property holding a base64 SVG — full artwork, with the
-PURELANE cap, the labelled front panel and the product name set in type.
+The first pass at this redrew the bottles from scratch in Pillow, which can only
+ever approximate them. It is not necessary: every `.pimg` in the prototype is a
+CSS background pointing at a `--p-*` custom property holding a base64 SVG.
+Decoding the artwork the designer actually shipped and rasterising it is exact,
+which is the whole point — "this is a build, not a redesign".
 
-Redrawing that by hand can only ever approximate it. Decoding the SVG the
-designer actually shipped and rasterising it is exact, which is the whole point:
-"this is a build, not a redesign".
+These are the *flat* silhouettes, used wherever a product is one element of a
+group. The labelled bottles for the shop cards come from make_labelled_art.py.
 
 Chromium does the rasterising because these SVGs use gradients, blurs and
 embedded text; cairosvg and Pillow both drop parts of that.

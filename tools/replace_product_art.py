@@ -1,10 +1,9 @@
 """
 Swap the product photos for the artwork extracted from the prototype.
 
-upload_images.py --force attaches a second image rather than replacing the
-first, which leaves every product with two near-identical bottles and makes the
-featured image a coin toss. This deletes the existing media, waits for Shopify
-to release the handle, then uploads the new file under the same name.
+Attaching media without deleting first leaves a product holding both versions
+and makes the featured image a coin toss. This deletes the existing media, waits
+for Shopify to release the filename, then uploads under the same name.
 
 Run tools/extract_product_art.py first.
 

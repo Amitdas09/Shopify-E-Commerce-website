@@ -1,4 +1,6 @@
-# Generated product art — rebuild with: python tools/make_product_images.py
+# Generated product art. Rebuild with:
+#   python tools/extract_product_art.py   flat silhouettes  -> seed-images/flat/
+#   python tools/make_labelled_art.py     labelled bottles  -> seed-images/label/
 tools/seed-images/
 
 # Local preview output — rebuild with: python tools/preview.py && python tools/shoot.py
