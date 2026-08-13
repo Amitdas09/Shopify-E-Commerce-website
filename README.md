@@ -8,7 +8,8 @@ theme-editor safety — it is fixed, and every fix is written up in
 [docs/BUILD-NOTES.md](docs/BUILD-NOTES.md).
 
 
-**Live store:** `https://amits-store-qmbc0ab3.myshopify.com` · password on request
+**Live store:** https://amits-store-qmbc0ab3.myshopify.com 
+password on request
 
 ---
 
