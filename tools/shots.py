@@ -1,9 +1,13 @@
 """
 Capture the screenshots the README embeds.
 
+Written as JPEG at 1280px wide. These are gradient-heavy UI shots and full-size
+PNGs came to 4.9MB for seven images, which is most of a repo somebody has to
+clone; the same set as progressive JPEG is 0.7MB and indistinguishable inline.
+
 Storefront only. The theme-editor and admin-inventory shots have to be taken by
 hand because they need a logged-in admin session; drop those in as
-docs/screenshots/theme-editor.png and docs/screenshots/inventory.png.
+docs/screenshots/theme-editor.jpg and docs/screenshots/inventory.jpg.
 
 Usage:
   PURELANE_URL=https://your-store.myshopify.com PURELANE_PW=... python tools/shots.py
@@ -15,6 +19,8 @@ sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 OUT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
                    "docs", "screenshots")
 os.makedirs(OUT, exist_ok=True)
+WIDTH = 1280
+QUALITY = 88
 URL = os.environ["PURELANE_URL"].rstrip("/")
 PW = os.environ.get("PURELANE_PW", "")
 
@@ -29,6 +35,20 @@ def unlock(pg):
         pg.wait_for_load_state("networkidle")
     except Exception:
         pass
+
+
+def save(pg, target, name, full=False):
+    """Screenshot to PNG, then downscale and re-encode as JPEG."""
+    from PIL import Image
+    tmp = os.path.join(OUT, "_tmp.png")
+    (pg if full else target).screenshot(path=tmp)
+    im = Image.open(tmp).convert("RGB")
+    if im.width > WIDTH:
+        im = im.resize((WIDTH, round(im.height * WIDTH / im.width)), Image.LANCZOS)
+    im.save(os.path.join(OUT, name), "JPEG", quality=QUALITY,
+            optimize=True, progressive=True)
+    os.remove(tmp)
+    print("  " + name)
 
 
 def settle(pg):
@@ -46,15 +66,13 @@ with sync_playwright() as p:
     unlock(pg)
     pg.goto(URL, wait_until="networkidle")
     settle(pg)
-    pg.screenshot(path=os.path.join(OUT, "hero.png"))
-    print("  hero.png")
+    save(pg, pg, "hero.jpg", full=True)
 
-    for sel, name in [("#shop", "shop-grid.png"), ("#bundles", "bundles.png"),
-                      ("#combos", "combos.png"), ("#reviews", "reviews.png")]:
+    for sel, name in [("#shop", "shop-grid.jpg"), ("#bundles", "bundles.jpg"),
+                      ("#combos", "combos.jpg"), ("#reviews", "reviews.jpg")]:
         pg.locator(sel).scroll_into_view_if_needed()
         settle(pg)
-        pg.locator(sel).screenshot(path=os.path.join(OUT, name))
-        print("  " + name)
+        save(pg, pg.locator(sel), name)
 
     # Cart, proving the buy path end to end. The button is a real product form,
     # so this is the same path a customer takes, not an API call.
@@ -66,8 +84,7 @@ with sync_playwright() as p:
     pg.wait_for_load_state("networkidle")
     pg.goto(URL + "/cart", wait_until="networkidle")
     pg.wait_for_timeout(900)
-    pg.screenshot(path=os.path.join(OUT, "cart.png"))
-    print("  cart.png")
+    save(pg, pg, "cart.jpg", full=True)
     ctx.close()
 
     ctx = b.new_context(viewport={"width": 390, "height": 1100})
@@ -77,8 +94,7 @@ with sync_playwright() as p:
     settle(pg)
     pg.locator("#shop").scroll_into_view_if_needed()
     settle(pg)
-    pg.locator("#shop").screenshot(path=os.path.join(OUT, "shop-grid-mobile.png"))
-    print("  shop-grid-mobile.png")
+    save(pg, pg.locator("#shop"), "shop-grid-mobile.jpg")
     ctx.close()
 
     b.close()
