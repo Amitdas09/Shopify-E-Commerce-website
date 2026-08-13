@@ -72,6 +72,109 @@ including the animations.
 
 ---
 
+# The brief's questions, answered
+
+Short answers here. Each links to the full write-up.
+
+## 1. What metafield and metaobject definitions did you create?
+
+Only where Shopify has no native equivalent. Price, title, image, stock and URL
+all come from the product object and are not duplicated.
+
+**7 custom product fields**, namespace `purelane`:
+
+| Field | What it's for |
+|---|---|
+| `badge` | The corner pill on a card — "Best seller", "Top rated" |
+| `benefit` | Caption under a bottle in a combo — "Cuts grease instantly" |
+| `combo_items` | **Which products are inside a combo.** Drives the artwork, the "3 products" count and the "Includes:" sentence |
+| `flag` | Corner ribbon — "Most popular", "Best value" |
+| `save_label` | Overrides the auto-calculated "You save ₹398" chip |
+| `highlight` | Gives a combo card the gold border and solid button |
+| `includes` | The "Includes:" sentence. Left blank, it writes itself from `combo_items` |
+
+**2 standard Shopify fields**, used deliberately instead of custom ones:
+`reviews.rating` and `reviews.rating_count`. Because they are Shopify's standard
+keys, installing Judge.me, Loox or Okendo later fills in the star ratings with
+**no code change**.
+
+**1 metaobject — `purelane_review`**, with title, body, author, rating,
+verified, linked product and context. Reviews are not products or pages, so
+Shopify has nowhere to put them. This gives marketing a proper place to add one
+without touching the theme.
+
+All created over the Admin API by `tools/seed_store.py`, safe to re-run.
+→ [docs/metafields.md](docs/metafields.md)
+
+## 2. Build notes
+
+**What I'd flag about the original file**
+
+- It contains **two stylesheets** — a dark one and a light one overriding ~90 of
+  its rules. Only the light one ever paints, so half the CSS is dead weight.
+- Product names, prices and reviews are **typed into the HTML**. None of it is data.
+- Two background layers share **identical SVG ids**, so one silently never draws.
+- The JavaScript assumes it runs **once, on a finished page** — it breaks the
+  moment a merchant reorders sections.
+- The scroll handler forces the browser to recalculate layout **every frame**.
+- If the script fails the page **stays blank** — everything starts at `opacity: 0`.
+- Reduced-motion makes the review rail spin *faster* rather than stopping.
+- The accent colour fails contrast for small text (3.48:1, needs 4.5:1).
+
+**What I changed, and why**
+
+- Every piece is a **Shopify section** a merchant can add, remove, reorder and
+  edit — no developer.
+- Products, prices, stock and ratings are **real Shopify data**, so changing a
+  price in the admin changes the site.
+- **One shared product card** used by every section, instead of five copies.
+- Animations rebuilt to **survive the theme editor**, and to degrade safely if
+  JavaScript fails.
+- Fonts self-hosted, scroll handler rewritten, a blur animation dropped — speed.
+- Contrast, keyboard access, focus states and reduced-motion all fixed.
+- A real add-to-cart form that works with JavaScript switched off.
+
+**What I'd do with more time**
+
+- Wire add-to-cart into Dawn's cart drawer, so there is no page reload.
+- Build the real bundle picker — "Build this box" currently links to the product.
+- Automated screenshot tests at 375/768/1280, so "pixel-accurate" stays true.
+- Measure real field data before claiming any Core Web Vitals number.
+
+→ [docs/BUILD-NOTES.md](docs/BUILD-NOTES.md)
+
+## 3. AI workflow
+
+**What I delegated** — reading and mapping a 1,700-line file, extracting 22KB of
+SVG artwork by script, generating all 16 product images from the design's own
+art, and computing every contrast ratio rather than eyeballing it.
+
+**Where it failed me**
+
+- **It agreed with a wrong instruction.** I first asked for a flashy redesign
+  with Framer Motion — which the brief forbids and Liquid cannot run.
+- **Confident, invalid Liquid.** It used a filter Shopify does not have.
+- **A fix that made things worse.** A CSS `@layer` fix solved one problem and
+  silently created a bigger one, rendering every heading thin.
+- **It reads files well, but not intent.** The design uses two styles of product
+  image on purpose; I got that wrong twice before seeing the rule.
+
+> It never fails at the interesting logic — it fails at the boring joins between
+> systems. That is where the verification effort goes.
+
+**What I'd systematise for twenty more**
+
+- A **triage checklist** for any incoming prototype.
+- A **verification script** before every push — the difference between "should
+  work" and "does".
+- A **debug snippet** that prints what the platform actually sees.
+- **I decide the architecture, AI writes it.** Whether a combo is a product or a
+  metaobject decides what a merchant can do a year from now.
+
+→ [docs/AI-WORKFLOW.md](docs/AI-WORKFLOW.md)
+
+---
+
 ## Repository layout
 
 This repo holds **only the Purelane additions**, not a vendored copy of Dawn.
