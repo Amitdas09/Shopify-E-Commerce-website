@@ -1,15 +1,78 @@
 # Purelane — production Shopify sections
 
-The `purelane-homepage.html` prototype, rebuilt as sections for stock Dawn.
+The `purelane-homepage.html` prototype, rebuilt as sections for stock **Dawn**.
 
 The design is the spec and is reproduced as-is. The code is not: where the
 original file was wrong for production — semantics, accessibility, performance,
 theme-editor safety — it is fixed, and every fix is written up in
 [docs/BUILD-NOTES.md](docs/BUILD-NOTES.md).
 
+**Live store:** `https://amits-store-qmbc0ab3.myshopify.com` · password on request
+
 ---
 
-## The five sections
+## It is a working store, not a picture of one
+
+![Homepage hero](docs/screenshots/hero.png)
+
+Everything below is live Shopify data. Prices, stock, ratings and product names
+come from the catalogue, not from Liquid — change a price in the admin and the
+homepage changes.
+
+### The shop grid, with real inventory states
+
+![Shop grid](docs/screenshots/shop-grid.png)
+
+The eight cards are deliberately not eight perfect products. The brief asked for
+three edge cases and they are all in the first eight, so the grid actually
+proves something:
+
+| Card | What it demonstrates |
+|---|---|
+| **Washing machine cleaner & descaler** | **Sold out.** Real inventory: tracked, quantity 0, policy `deny`. The button is disabled and the pill reads `SOLD OUT`. Nothing is hardcoded — set the quantity above zero in the admin and it becomes buyable. |
+| **Magic eraser** | **No image.** Falls back to a branded bottle silhouette that holds the same aspect ratio, so the row never collapses or shifts. |
+| **Purelane Concentrated Multi-Surface Kitchen Degreaser…** | **A 162-character title.** It wraps and grows the row instead of overflowing, and `margin-top: auto` on the price keeps every buy button on one baseline across the row. |
+
+### Add to cart works
+
+![Cart](docs/screenshots/cart.png)
+
+Each card carries a real `{% form 'product' %}`, so it posts to `/cart/add` and
+works with JavaScript disabled. The screenshot above was taken by a script that
+clicks the button on the homepage exactly as a customer would — not by calling
+the API.
+
+### 375px up
+
+![Shop grid on mobile](docs/screenshots/shop-grid-mobile.png)
+
+Two columns on mobile, four on desktop, matching the prototype's breakpoints. No
+horizontal overflow at 375, 768 or 1280.
+
+### The rest of the page
+
+| | |
+|---|---|
+| ![Combos](docs/screenshots/combos.png) | ![Bundles](docs/screenshots/bundles.png) |
+| **Best-selling combos** — a swipeable rail. Contents, savings and the `Includes:` sentence are computed from a product-list metafield. | **Bundles** — price, compare-at and the per-unit figure all derive from the real bundle product. |
+
+![Reviews](docs/screenshots/reviews.png)
+
+**Reviews rail** — a marquee fed by `purelane_review` metaobjects, with a pause
+control because WCAG 2.2.2 requires a way to stop anything that moves for more
+than five seconds.
+
+### Every section is merchant-editable
+
+![Theme editor](docs/screenshots/theme-editor.png)
+
+Fifteen sections in the theme editor. A marketing team adds, removes, reorders
+and reconfigures them with no developer, and nothing breaks when they do —
+including the animations.
+
+---
+
+## The five required sections
 
 | # | Section | File | Prototype |
 |---|---|---|---|
@@ -18,6 +81,10 @@ theme-editor safety — it is fixed, and every fix is written up in
 | 03 | Best-selling combos | `sections/purelane-combos.liquid` | `#combos` |
 | 04 | Bundles | `sections/purelane-bundles.liquid` | `#bundles` |
 | 05 | Reviews rail | `sections/purelane-reviews.liquid` | `#reviews` |
+
+Ten more were built as bonus: ingredients, pillars, proof + rotator, full range,
+why-bundles, categories, trust bar, signup, and the ticker / header / progress
+rail / sticky CTA / footer chrome.
 
 Plus `sections/purelane-ambient.liquid` — the fixed mint backdrop with the
 caustics and bubbles. It sits behind everything, so it belongs to no single
@@ -30,7 +97,8 @@ Several sections render the same objects, so they render the same snippets.
 
 ```
 snippets/
-  purelane-assets.liquid          fonts + core CSS + reveal, rendered by every section
+  purelane-head.liquid            fonts + core CSS, rendered once from theme.liquid
+  purelane-assets.liquid          the reveal script, rendered by every section
   purelane-product-card.liquid    the card in the shop grid
   purelane-product-image.liquid   responsive <img>, or a branded placeholder
   purelane-price.liquid           price / compare-at / computed saving
@@ -46,7 +114,25 @@ Nothing that reads as copy or catalogue is hardcoded. Prices, titles, images and
 availability come from products; reviews come from a `purelane_review`
 metaobject; the rest are section settings and blocks.
 
+Ratings use Shopify's **standard** `reviews.rating` definitions rather than
+custom ones, so installing Judge.me, Okendo, Loox or Yotpo populates the stars
+with no theme change.
+
 Definitions: [docs/metafields.md](docs/metafields.md).
+
+## The one Dawn file this touches
+
+`layout/theme.liquid` gains a single line after Dawn's `base.css`:
+
+```liquid
+{%- render 'purelane-head' -%}
+```
+
+Fonts and design tokens have to be emitted **once**, in the head, after Dawn.
+Everything else is additive and prefixed `purelane-`, so no stock file is
+overwritten. `tools/install-into-dawn.sh` applies the patch idempotently.
+The reasoning — including the `@layer` approach that made things worse before
+this replaced it — is in [docs/BUILD-NOTES.md](docs/BUILD-NOTES.md).
 
 ## Getting it running
 
@@ -54,16 +140,30 @@ Definitions: [docs/metafields.md](docs/metafields.md).
 about 45 minutes, all free.
 
 ```bash
-python tools/make_product_images.py     # product art, redrawn from the design
-# tools/seed-products.csv               # 16 products incl. the three edge cases
+bash tools/install-into-dawn.sh ../purelane-store   # clone Dawn, lay this on top
+# tools/seed-products.csv                           # 16 products, 3 edge cases
+
+export SHOPIFY_STORE=your-store.myshopify.com
+export SHOPIFY_TOKEN=shpat_...
+
+python tools/seed_store.py            # metafield + metaobject definitions, values
+python tools/extract_product_art.py   # flat silhouettes, from the prototype's SVGs
+python tools/make_labelled_art.py     # labelled bottles, from its finished templates
+python tools/replace_product_art.py   # upload both per product
+python tools/seed_ratings.py          # standard reviews.* metafields
+python tools/fix_inventory.py         # tracking, policy and quantity from the CSV
 ```
+
+`fix_inventory.py` is not optional: Shopify's CSV importer silently drops the
+inventory tracker column, so every variant lands untracked and the seeded
+quantities are decorative until this runs.
 
 ## Reading the notes
 
 - [docs/BUILD-NOTES.md](docs/BUILD-NOTES.md) — what I'd flag about the original,
   what changed and why, what I'd do with more time
 - [docs/AI-WORKFLOW.md](docs/AI-WORKFLOW.md) — what I delegated, where it failed
-  me, what I'd systematise
+  me, what I'd systematise for twenty more of these
 - [docs/metafields.md](docs/metafields.md) — every definition to create
 - [docs/SETUP.md](docs/SETUP.md) — store setup and the QA checklist
 
@@ -75,7 +175,6 @@ result at every breakpoint the design cares about:
 
 ```bash
 pip install python-liquid playwright && playwright install chromium
-python tools/make_product_images.py   # once
 python tools/preview.py --open        # -> tools/preview/index.html
 python tools/shoot.py                 # -> tools/preview/shots/*.png
 ```
@@ -95,3 +194,27 @@ Parses every `{% schema %}` block as JSON, checks setting ids are unique and
 actually used, resolves every rendered snippet and `asset_url`, syntax-checks
 every JS asset, parses the seed CSV and confirms it carries all three required
 edge cases, and recomputes the contrast ratios quoted in the build notes.
+
+Screenshots in this README are regenerated by:
+
+```bash
+PURELANE_URL=https://your-store.myshopify.com PURELANE_PW=... python tools/shots.py
+```
+
+## Known gaps
+
+Named rather than hidden, because the brief asked for that.
+
+- **Currency renders `Rs. 200.00`, not `₹200`.** This is Shopify's store-level
+  currency formatting, not a theme value — `moneyFormat` is read-only over the
+  API. Setting it to `₹{{amount_no_decimals}}` in Settings → Store details makes
+  every price match the design exactly.
+- **One paragraph in the bundles intro wraps to three lines where the design has
+  two.** Our `max-width` is `44ch`, identical to the prototype, and measures
+  479.6px live; the difference is sub-1% font metrics between the self-hosted
+  Inter subset and the Google-served original. Not papered over by distorting
+  the width.
+- **The no-image product also shows the placeholder in the range strip.** The
+  brief's explicit edge-case requirement won over that one tile.
+- **Performance is reasoned from the code and from lab runs.** No CrUX field
+  data, so no Core Web Vitals number is claimed.
