@@ -330,22 +330,30 @@
 
   .purelane-js .purelane .rv {
     opacity: 0;
-    transform: translateY(30px);
-    filter: blur(7px);
-    transition: opacity 0.95s var(--ease), transform 0.95s var(--ease), filter 0.95s var(--ease);
+    transform: translateY(18px);
+    /* The prototype also animated filter: blur(7px) across the same 0.95s.
+       Blur cannot be composited, so every frame of every reveal repainted the
+       element and everything beneath it — including four full-viewport
+       blend-mode backdrop layers. That is the laboured, arrives-late feel.
+       Opacity and transform are GPU-composited, so the same gesture now costs
+       nothing and lands in well under half the time. */
+    transition: opacity 0.42s var(--ease), transform 0.42s var(--ease);
+    will-change: opacity, transform;
   }
 
   .purelane-js .purelane .rv.in {
     opacity: 1;
     transform: none;
-    filter: none;
+    /* Release the compositor layer once the reveal is done; leaving will-change
+       on permanently keeps a layer per element for the life of the page. */
+    will-change: auto;
   }
 
-  .purelane .rv-d1 { transition-delay: 0.09s; }
-  .purelane .rv-d2 { transition-delay: 0.18s; }
-  .purelane .rv-d3 { transition-delay: 0.27s; }
-  .purelane .rv-d4 { transition-delay: 0.36s; }
-  .purelane .rv-d5 { transition-delay: 0.45s; }
+  .purelane .rv-d1 { transition-delay: 0.05s; }
+  .purelane .rv-d2 { transition-delay: 0.10s; }
+  .purelane .rv-d3 { transition-delay: 0.15s; }
+  .purelane .rv-d4 { transition-delay: 0.20s; }
+  .purelane .rv-d5 { transition-delay: 0.25s; }
 
   /* ---------- shared price + rating atoms ---------- */
 

@@ -9,6 +9,31 @@
 
 @layer purelane-base, purelane-section;
 
+/* ---------------------------------------------------------------------------
+   Deliberately OUTSIDE the layer.
+
+   Dawn's base.css carries:
+       a:empty, ul:empty, div:empty, section:empty, p:empty, h1:empty …
+         { display: none }
+
+   Every scene layer and the vignette are empty <div>s, and every progress-rail
+   dot is an empty <a> — so Dawn hid the entire animated background and the whole
+   rail. The page rendered on a flat lavender ground instead of the mint one.
+
+   Specificity cannot fix this from inside a layer: unlayered CSS beats layered
+   CSS outright, whatever the selector weight. These three rules therefore sit
+   unlayered, where (0,2,0) beats Dawn's (0,1,1) on the ordinary cascade.
+
+   The prototype had the same empty divs and never noticed, because it had no
+   other stylesheet to collide with.
+   --------------------------------------------------------------------------- */
+
+.purelane-scenes .scene,
+.purelane-scenes .vig,
+.purelane-rail a {
+  display: block;
+}
+
 @layer purelane-section {
   .purelane-scenes {
     position: fixed;

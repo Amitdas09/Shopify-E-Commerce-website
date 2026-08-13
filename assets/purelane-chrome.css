@@ -4,6 +4,13 @@
 
 @layer purelane-base, purelane-section;
 
+/* Unlayered on purpose: Dawn's base.css hides every empty <a>, which is exactly
+   what a progress-rail dot is. Unlayered CSS outranks layered CSS regardless of
+   specificity, so the override cannot live in the layer below. */
+.purelane-rail a {
+  display: block;
+}
+
 @layer purelane-section {
   /* ---------- ticker ---------- */
 

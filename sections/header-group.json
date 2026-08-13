@@ -5,23 +5,100 @@
     "purelane_ticker": {
       "type": "purelane-ticker",
       "blocks": {
-        "m1": { "type": "message", "settings": { "text": "Free shipping", "highlight": "on every bundle across India" } },
-        "m2": { "type": "message", "settings": { "text": "100% plant-based", "highlight": "and non-toxic" } },
-        "m3": { "type": "message", "settings": { "text": "Loved by", "highlight": "30,000+ happy homes" } },
-        "m4": { "type": "message", "settings": { "text": "Buy 3", "highlight": "at flat ₹499" } }
+        "m1": {
+          "type": "message",
+          "settings": {
+            "text": "Free shipping",
+            "highlight": "on every bundle across India"
+          }
+        },
+        "m2": {
+          "type": "message",
+          "settings": {
+            "text": "100% plant-based",
+            "highlight": "and non-toxic"
+          }
+        },
+        "m3": {
+          "type": "message",
+          "settings": {
+            "text": "Loved by",
+            "highlight": "30,000+ happy homes"
+          }
+        },
+        "m4": {
+          "type": "message",
+          "settings": {
+            "text": "Buy 3",
+            "highlight": "at flat ₹499"
+          }
+        }
       },
-      "block_order": ["m1", "m2", "m3", "m4"],
-      "settings": { "label": "Store offers" }
+      "block_order": [
+        "m1",
+        "m2",
+        "m3",
+        "m4"
+      ],
+      "settings": {
+        "label": "Store offers"
+      }
     },
     "purelane_header": {
       "type": "purelane-header",
       "settings": {
         "brand_name": "Purelane",
         "tagline": "Clean, simply",
-        "menu": "main-menu",
         "show_search": true
-      }
+      },
+      "blocks": {
+        "n1": {
+          "type": "link",
+          "settings": {
+            "label": "Home",
+            "url": "/"
+          }
+        },
+        "n2": {
+          "type": "link",
+          "settings": {
+            "label": "Ingredients",
+            "url": "/#ingredients"
+          }
+        },
+        "n3": {
+          "type": "link",
+          "settings": {
+            "label": "How it works",
+            "url": "/#how"
+          }
+        },
+        "n4": {
+          "type": "link",
+          "settings": {
+            "label": "Shop",
+            "url": "/#shop"
+          }
+        },
+        "n5": {
+          "type": "link",
+          "settings": {
+            "label": "Bundles",
+            "url": "/#bundles"
+          }
+        }
+      },
+      "block_order": [
+        "n1",
+        "n2",
+        "n3",
+        "n4",
+        "n5"
+      ]
     }
   },
-  "order": ["purelane_ticker", "purelane_header"]
+  "order": [
+    "purelane_ticker",
+    "purelane_header"
+  ]
 }

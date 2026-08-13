@@ -48,7 +48,15 @@
           observer.unobserve(entry.target);
         });
       },
-      { rootMargin: '0px 0px -12% 0px', threshold: 0.12 }
+      /* The prototype waited until an element was 12% inside the viewport and
+         then ran a 0.95s transition, so content finished arriving roughly a
+         third of a screen after you had already scrolled past its top edge —
+         it read as the page loading late rather than as an entrance.
+         A positive bottom margin starts the reveal just before the element
+         reaches the fold, so it is settled by the time it is actually looked
+         at, and threshold 0 fires on first contact rather than after 12% of a
+         tall section has scrolled in. */
+      { rootMargin: '0px 0px 12% 0px', threshold: 0 }
     );
 
     return observer;

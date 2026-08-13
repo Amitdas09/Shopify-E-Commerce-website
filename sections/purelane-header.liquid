@@ -15,6 +15,8 @@
 {%- render 'purelane-assets' -%}
 {{ 'purelane-chrome.css' | asset_url | stylesheet_tag }}
 
+{%- assign links = section.blocks | where: 'type', 'link' -%}
+
 <div class="purelane">
   <header class="purelane-header" data-purelane-header>
     <div class="navpill glass">
@@ -37,7 +39,22 @@
         </span>
       </a>
 
-      {%- if section.settings.menu != blank -%}
+      {%- comment -%}
+        Links come from blocks first, a Shopify menu second.
+
+        A Shopify menu cannot hold on-page anchors like /#bundles, and the
+        design's nav is mostly anchors into this page — Dawn's default menu
+        (Home, Catalog, Contact) is what shows otherwise, which is not the
+        design. Blocks keep it editable without a developer and without
+        depending on a menu existing.
+      {%- endcomment -%}
+      {%- if links.size > 0 -%}
+        <nav class="nav" aria-label="Main">
+          {%- for block in links -%}
+            <a href="{{ block.settings.url | default: '#' }}" {{ block.shopify_attributes }}>{{ block.settings.label }}</a>
+          {%- endfor -%}
+        </nav>
+      {%- elsif section.settings.menu != blank -%}
         <nav class="nav" aria-label="Main">
           {%- for link in section.settings.menu.links -%}
             <a href="{{ link.url }}"{% if link.active %} aria-current="page"{% endif %}>{{ link.title }}</a>
@@ -63,7 +80,7 @@
           <span class="dot" aria-hidden="true">{{ cart.item_count }}</span>
         </a>
 
-        {%- if section.settings.menu != blank -%}
+        {%- if links.size > 0 or section.settings.menu != blank -%}
           <button class="ico burger" type="button" data-purelane-menu aria-expanded="false" aria-controls="pl-drawer-{{ section.id }}" aria-label="Menu">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 8h16M4 16h16"/></svg>
           </button>
@@ -71,11 +88,17 @@
       </div>
     </div>
 
-    {%- if section.settings.menu != blank -%}
+    {%- if links.size > 0 or section.settings.menu != blank -%}
       <nav class="drawer glass" id="pl-drawer-{{ section.id }}" aria-label="Mobile">
-        {%- for link in section.settings.menu.links -%}
-          <a href="{{ link.url }}"{% if link.active %} aria-current="page"{% endif %}>{{ link.title }}</a>
-        {%- endfor -%}
+        {%- if links.size > 0 -%}
+          {%- for block in links -%}
+            <a href="{{ block.settings.url | default: '#' }}">{{ block.settings.label }}</a>
+          {%- endfor -%}
+        {%- else -%}
+          {%- for link in section.settings.menu.links -%}
+            <a href="{{ link.url }}"{% if link.active %} aria-current="page"{% endif %}>{{ link.title }}</a>
+          {%- endfor -%}
+        {%- endif -%}
       </nav>
     {%- endif -%}
   </header>
@@ -87,11 +110,98 @@
 {
   "name": "Purelane header",
   "settings": [
-    { "type": "image_picker", "id": "logo", "label": "Logo" },
-    { "type": "text", "id": "brand_name", "label": "Brand name", "default": "Purelane" },
-    { "type": "text", "id": "tagline", "label": "Tagline", "default": "Clean, simply" },
-    { "type": "link_list", "id": "menu", "label": "Menu", "default": "main-menu" },
-    { "type": "checkbox", "id": "show_search", "label": "Show search", "default": true }
+    {
+      "type": "image_picker",
+      "id": "logo",
+      "label": "Logo"
+    },
+    {
+      "type": "text",
+      "id": "brand_name",
+      "label": "Brand name",
+      "default": "Purelane"
+    },
+    {
+      "type": "text",
+      "id": "tagline",
+      "label": "Tagline",
+      "default": "Clean, simply"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_search",
+      "label": "Show search",
+      "default": true
+    },
+    {
+      "type": "link_list",
+      "id": "menu",
+      "label": "Fallback menu",
+      "info": "Only used when there are no Nav link blocks."
+    }
+  ],
+  "max_blocks": 8,
+  "blocks": [
+    {
+      "type": "link",
+      "name": "Nav link",
+      "settings": [
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Label",
+          "default": "Shop"
+        },
+        {
+          "type": "url",
+          "id": "url",
+          "label": "Link",
+          "info": "On-page anchors work here: /#shop, /#bundles"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Purelane header",
+      "blocks": [
+        {
+          "type": "link",
+          "settings": {
+            "label": "Home",
+            "url": "/"
+          }
+        },
+        {
+          "type": "link",
+          "settings": {
+            "label": "Ingredients",
+            "url": "/#ingredients"
+          }
+        },
+        {
+          "type": "link",
+          "settings": {
+            "label": "How it works",
+            "url": "/#how"
+          }
+        },
+        {
+          "type": "link",
+          "settings": {
+            "label": "Shop",
+            "url": "/#shop"
+          }
+        },
+        {
+          "type": "link",
+          "settings": {
+            "label": "Bundles",
+            "url": "/#bundles"
+          }
+        }
+      ]
+    }
   ]
 }
 {% endschema %}
