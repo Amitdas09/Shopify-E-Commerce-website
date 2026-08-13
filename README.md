@@ -9,7 +9,7 @@ theme-editor safety — it is fixed, and every fix is written up in
 
 
 **Live store:** https://amits-store-qmbc0ab3.myshopify.com 
-password on request
+**Password on request** : Admin@2026
 
 ---
 
