@@ -58,11 +58,89 @@ types, not by looking at the output.
 comma and was not quoted, so it parsed as 22 columns instead of 21. Caught in
 two seconds by parsing the file; would have been a confusing failed import.
 
-The pattern in all four: the failures are never in the interesting logic. They
-are in the boring interface between systems — a filter name, a drop's type, a
-comma. Everything I actually verify is at those seams.
+**A fix that made things worse, confidently.** Core CSS is emitted once per
+section so a section can stand alone, so the page carries N copies, and the last
+copy sits after the first section's own stylesheet. Two rules of equal
+specificity — `.purelane .glass-2` and `.purelane-hero .badges`, both (0,2,0) —
+resolved the wrong way and dropped the hero badge rail out of position. Wrapping
+everything in `@layer` fixed that collision and quietly created a worse one:
+unlayered CSS beats layered CSS at *any* specificity, so every collision with
+Dawn's own rules started resolving Dawn's way. Plain `h2 { font-weight: 400 }`
+outranked `.purelane .d2 { font-weight: 800 }` and every section heading
+rendered thin. It took a screenshot diff to see it and a second look at the
+cascade to understand why. The real fix was ordering — emit core once from
+`<head>` after Dawn's `base.css` — which is less clever and cannot rebound.
+
+**Reading the prototype's intent, not just its bytes.** Its shop shelf holds
+eight cards drawn two different ways: four flat silhouettes, four fully drawn
+labelled bottles. I read that as one art set, rasterised the flat ones
+faithfully, and shipped eight placeholder cards. Then I over-corrected and made
+everything labelled, flattening a distinction the design uses deliberately —
+flat wherever a product is one of a group, labelled where it is the subject. A
+model is good at "what does this file contain" and bad at "which half of this
+did the designer mean". Both passes were confidently wrong in opposite
+directions.
+
+**Trusting my own earlier conclusion.** I called a null `onlineStoreUrl` a red
+herring, explained by the storefront password. It was not — the products
+genuinely were not on the Online Store publication. That wrong call sat in my
+notes for several rounds and shaped everything I looked at next. Cached
+conclusions are more dangerous than cached pages.
+
+The pattern in all of these: the failures are never in the interesting logic.
+They are in the boring interface between systems — a filter name, a drop's type,
+a comma, a cascade rule, an assumption I made two hours earlier. Everything I
+actually verify is at those seams.
+
+## What the platform got wrong, and how I found it
+
+Worth separating from the AI failures, because these were the expensive ones and
+none of them announce themselves.
+
+**Section-group and template JSON silently lose new settings.** Push a section's
+Liquid and its group JSON together and Shopify validates the JSON against the
+schema it already holds — so any setting the live schema does not yet know is
+dropped on write, with no error. The footer's link columns rendered a heading
+over nothing for exactly this reason. Push the Liquid first, then the JSON.
+
+**`metaobject_list` does not bind from a JSON template.** Five correct GIDs in
+`templates/index.json`, five storefront-readable entries, and
+`section.settings.reviews` still resolved to an empty drop that reports `size 0`
+and iterates zero times. `shop.metaobjects.purelane_review.values` returned all
+five from the same page. The setting appears to bind only when saved through the
+theme editor. The section now treats an empty picker as "show every published
+entry", which is both a working homepage and better merchant behaviour.
+
+**The CSV importer drops the inventory tracker column.** Every variant imported
+untracked, which makes the seeded quantities decorative — Shopify neither
+decrements them nor blocks a sale. Silent. Found by reading the store back
+rather than trusting the import summary.
+
+**The storefront caches the homepage for minutes after a push.** I debugged a
+stale page more than once, including one round where I concluded a data problem
+was a Liquid problem. Every storefront check in these tools now sends
+`Cache-Control: no-cache`.
+
+**Admin truth and storefront truth are different truths.** The longest chase in
+the build: Admin reported `availableForSale: true` and
+`sellableOnlineQuantity: 142` while Liquid reported the variant unavailable with
+an empty quantity, and every product showed Sold out. Neither number is wrong —
+Admin has no buyer context and the storefront does. It resolved to two settings
+outside the theme entirely: the default location was not fulfilling online
+orders, and the shop shipped only to `["US"]` while the storefront resolved
+`countryCode: IN`. The lesson I would carry forward is to instrument the actual
+renderer early — one temporary Liquid comment printing `product.available` and
+`variant.inventory_quantity` answered in one push what six API queries could
+not.
 
 ## What I'd systematise for twenty more of these
+
+**Instrument the renderer, not the API.** The fastest debugging tool in this
+build was a one-line HTML comment printing what Liquid could actually see,
+pushed and read back. Where the platform has two views of the same fact — Admin
+and storefront — asking the API harder only ever confirms the view that is not
+the problem. A reusable `{% render 'purelane-debug' %}` snippet, off by default,
+is the first thing I would add for the next build.
 
 **A verification pass that runs, not reads.** Everything checkable was checked
 by executing something: every `{% schema %}` block parsed as JSON, every JS file

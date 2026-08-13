@@ -23,7 +23,27 @@ PAD = {"padding_top": 34, "padding_bottom": 34}
 # carry. Referencing products directly by handle removes the dependency
 # entirely — a merchant can still switch any of these back to Collection in the
 # theme editor once the collection is published.
-BESTSELLERS = ['tap-cleaner-limescale-remover', 'kitchen-cleaner-foaming', 'copper-bronze-brass-cleaner', 'dishwash-gel', 'laundry-detergent', 'floor-cleaner', 'toilet-cleaner', 'liquid-handwash', 'washing-machine-cleaner', 'magic-eraser', 'kitchen-degreaser-refill-pouch']
+# Order matters: the shop grid takes the first eight, and the three seeded edge
+# cases have to be among them or the grid proves nothing.
+#
+# Row 1 is the prototype's own four cards, in its order — and its fourth,
+# washing-machine-cleaner, is the sold-out product, so the design's layout and
+# the out-of-stock state land in the same place.
+# Row 2 carries the other two edge cases: magic-eraser has no image, and the
+# refill pouch has a 162-character title.
+BESTSELLERS = [
+    'tap-cleaner-limescale-remover',    # normal
+    'kitchen-cleaner-foaming',          # normal
+    'copper-bronze-brass-cleaner',      # normal
+    'washing-machine-cleaner',          # EDGE: sold out
+    'dishwash-gel',                     # normal
+    'magic-eraser',                     # EDGE: no image
+    'floor-cleaner',                    # normal
+    'kitchen-degreaser-refill-pouch',   # EDGE: 162-char title
+    'laundry-detergent',
+    'toilet-cleaner',
+    'liquid-handwash',
+]
 COMBO_PRODUCTS = ['kitchen-essentials-combo', 'laundry-care-bundle', 'complete-home-bundle', 'bathroom-deep-clean', 'hard-water-solution-kit']
 REVIEW_GIDS = ['gid://shopify/Metaobject/258093383754', 'gid://shopify/Metaobject/258093416522', 'gid://shopify/Metaobject/258093449290', 'gid://shopify/Metaobject/258093482058', 'gid://shopify/Metaobject/258093514826']
 

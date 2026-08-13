@@ -64,8 +64,25 @@ query($handle: String!) {
   productByHandle(handle: $handle) {
     id title
     variants(first: 10) {
-      nodes { id inventoryPolicy inventoryItem { id tracked } }
+      nodes {
+        id
+        inventoryPolicy
+        inventoryItem {
+          id
+          tracked
+          inventoryLevels(first: 10) { nodes { location { id } } }
+        }
+      }
     }
+  }
+}
+"""
+
+ACTIVATE = """
+mutation($inventoryItemId: ID!, $locationId: ID!, $available: Int) {
+  inventoryActivate(inventoryItemId: $inventoryItemId, locationId: $locationId, available: $available) {
+    inventoryLevel { id }
+    userErrors { field message }
   }
 }
 """
@@ -139,17 +156,35 @@ def main():
             continue
 
         if tracked:
+            # Write to the location the item is already stocked at, not simply
+            # the first one the API lists. Once a store has more than one
+            # location those are frequently different, and setQuantities
+            # rejects a location the item was never activated at rather than
+            # creating the level — which is how a perfectly correct run can
+            # report sixteen failures and change nothing.
+            plan = []
+            for v in variants:
+                levels = v["inventoryItem"]["inventoryLevels"]["nodes"]
+                target = levels[0]["location"]["id"] if levels else location_id
+                if not levels:
+                    call(ACTIVATE, {
+                        "inventoryItemId": v["inventoryItem"]["id"],
+                        "locationId": target,
+                        "available": qty,
+                    })
+                plan.append({
+                    "inventoryItemId": v["inventoryItem"]["id"],
+                    "locationId": target,
+                    "quantity": qty,
+                })
+
             # setQuantities is absolute, not a delta, so re-running is safe and
             # lands on the CSV figure whatever the store drifted to.
             result = call(SET_QUANTITIES, {"input": {
                 "name": "available",
                 "reason": "correction",
                 "ignoreCompareQuantity": True,
-                "quantities": [{
-                    "inventoryItemId": v["inventoryItem"]["id"],
-                    "locationId": location_id,
-                    "quantity": qty,
-                } for v in variants],
+                "quantities": plan,
             }})
             errs = result["inventorySetQuantities"]["userErrors"]
             if errs:

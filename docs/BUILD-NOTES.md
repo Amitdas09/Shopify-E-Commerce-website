@@ -131,12 +131,65 @@ source order decided it, and the shop grid's copy of core.css — five sections
 further down the document — won. The hero badge rail dropped out of position
 entirely.
 
-Both files now declare `@layer purelane-base, purelane-section;` and put their
-rules in the matching layer. Layer order is set by the first declaration and is
-immune to how many times either file is emitted, or in what order.
+My first fix was `@layer purelane-base, purelane-section;` in both files. It
+solved this collision and created a worse one, so it is worth recording as a
+wrong turn rather than quietly deleting.
+
+Unlayered CSS beats layered CSS at **any** specificity. Putting our rules in a
+layer therefore handed every collision with Dawn to Dawn: plain
+`h2 { font-weight: 400 }` outranked `.purelane .d2 { font-weight: 800 }` and
+every section heading rendered thin, and Dawn's `div:empty { display: none }`
+could no longer be overridden from inside the layer at all — which is what hid
+the entire animated backdrop.
+
+The fix is ordering, which is duller and cannot rebound:
+
+```
+<head>   Dawn base.css  →  purelane-core.css     emitted once, so it wins over Dawn
+<body>   purelane-<section>.css                  parsed later, so it wins over core
+```
+
+`purelane-core.css` now renders once from `snippets/purelane-head.liquid`, which
+`layout/theme.liquid` calls immediately after Dawn's `base.css`. That one render
+line is the only modification to a stock Dawn file in this build, and
+`tools/install-into-dawn.sh` applies it idempotently.
 
 This is the class of bug that only appears once more than one section is on the
 page, which is exactly what a prototype never tests.
+
+### The reset was load-bearing and I did not port it
+
+The prototype opens with `* { box-sizing: border-box; margin: 0; padding: 0 }`,
+and every rule after it is written on that footing — a rule names a margin only
+where it wants one. I ported the rules and not the reset, so Dawn's element
+defaults showed through everywhere the prototype was silent.
+
+It was most visible in the bundle tiers, where `<p class="qty">` and
+`<p class="per">` each picked up a bottom margin and made the cards about 150px
+taller than the design, but it was latent in every section. `purelane-core.css`
+now carries the reset scoped to `.purelane` and wrapped in `:where()`, so it
+sits at zero specificity and can only ever fill a gap — every explicit Purelane
+margin still wins, and no Dawn page is affected.
+
+### The shop shelf is drawn two different ways
+
+The eight cards in `#shop` are not one component repeated. The first four paint
+`.pimg` background silhouettes from the `--p-*` custom properties; the last four
+are inline SVGs with a trigger head, glass highlights, a floor shadow and a real
+label carrying the leaf mark, the PURELANE wordmark, the product name and the
+fill volume.
+
+Read once, that looks like inconsistency. Read against the rest of the file, it
+is a rule: the flat silhouette appears wherever a product is one element of a
+group — hero stage, rotator, combo trays, bundle tiers, range strip, category
+tiles — and the labelled bottle appears where the product is the subject. The
+first four shelf cards are simply placeholders the designer had not replaced.
+
+A Shopify product has one featured image, so each product carries both: media 1
+is the silhouette, media 2 the labelled bottle.
+`snippets/purelane-product-image.liquid` takes `art: 'label'` to reach for the
+second and falls back to the featured image when a product only has one, so a
+merchant who uploads a single photo still gets a working card.
 
 ---
 
@@ -236,21 +289,28 @@ Two divergences to know about when reading its output:
 
 ## What I'd do with more time
 
-1. **Self-host the fonts.** Two woff2 subsets in `assets/` removes a third-party
-   connection from the critical path. It is the largest remaining LCP win.
-2. **Real field data.** Everything above is reasoned from the code and from lab
+1. **Real field data.** Everything here is reasoned from the code and from lab
    runs. I would want a week of CrUX before claiming a Core Web Vitals number.
-3. **Cart drawer integration.** The add-to-cart form is a real form and works
+2. **Cart drawer integration.** The add-to-cart form is a real form and works
    unenhanced. Wiring it to Dawn's `cart-notification` / `cart-drawer` would
    remove the page reload.
-4. **A bundle builder.** "Build this box" currently links to the bundle product.
+3. **A bundle builder.** "Build this box" currently links to the bundle product.
    The design implies a picker that pre-fills a tier and lets you swap items —
    that is a cart-transform or a bundles app, and a real scoping conversation.
-5. **The remaining eight sections.** Ingredients, how-it-works, proof, range,
-   why-bundles, categories, trust bar and signup. The card, price, rating, image
-   and icon snippets already cover most of what they need.
-6. **Visual regression tests.** Playwright screenshots at 375/768/1200 against
+4. **Visual regression tests.** Playwright screenshots at 375/768/1200 against
    the prototype, run in CI, so "pixel-accurate" stays true after the next edit.
-7. **A per-section CSS budget.** Right now each section ships its own file. At
-   six sections that is six requests; I would want to measure whether inlining
-   the critical slice beats the caching.
+   I built these checks ad hoc while chasing specific bugs; they should be a
+   suite, not a habit.
+5. **A per-section CSS budget.** Each section ships its own file. At fifteen
+   sections that is fifteen requests; I would want to measure whether inlining
+   the critical slice beats the caching, rather than assume it.
+6. **The `metaobject_list` picker.** Reviews currently fall back to every
+   published entry because the picker does not bind from a JSON template. A
+   merchant curating a subset has to do it in the theme editor, which works but
+   is not obvious. I would want to understand whether that is a documented
+   Shopify constraint or something I can work around before shipping this to a
+   real client.
+7. **Deliberate mobile art.** The labelled bottle's label type is set at
+   6.4–8.6px in a 130×200 viewBox, which is legible on a card at 250px and
+   almost not at 375px two-up. The prototype has the same issue. A second,
+   simplified label crop for small viewports would be the honest fix.
