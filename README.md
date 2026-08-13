@@ -335,3 +335,26 @@ cart, routing and the image CDN are not reproduced. It exists to catch layout
 and Liquid mistakes before they reach a store, and it earned its keep: three of
 the findings in the build notes came out of it and out of nothing else.
  is claimed.
+
+## Known gaps
+
+Named rather than hidden, because the brief asked for that.
+
+- **Currency renders `Rs. 200.00`, not `₹200`.** This is Shopify's store-level
+  currency formatting, not a theme value — `moneyFormat` is read-only over the
+  API. Setting it to `₹{{amount_no_decimals}}` in Settings → Store details makes
+  every price match the design exactly.
+- **One paragraph in the bundles intro wraps to three lines where the design has
+  two.** Our `max-width` is `44ch`, identical to the prototype, and measures
+  479.6px live; the difference is sub-1% font metrics between the self-hosted
+  Inter subset and the Google-served original. Not papered over by distorting
+  the width.
+- **The no-image product also shows the placeholder in the range strip.** The
+  brief's explicit edge-case requirement won over that one tile.
+- **Performance is reasoned from the code and from lab runs.** No CrUX field
+  data, so no Core Web Vitals number is claimed.
+
+
+
+
+
