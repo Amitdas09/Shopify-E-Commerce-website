@@ -13,7 +13,9 @@ theme-editor safety — it is fixed, and every fix is written up in
 
 ## It is a working store, not a picture of one
 
-![Homepage hero](docs/screenshots/hero.jpg)
+
+<img width="1919" height="1079" alt="image" src="https://github.com/user-attachments/assets/87a96748-9beb-485d-8c9e-b9fd765409a2" />
+
 
 Everything below is live Shopify data. Prices, stock, ratings and product names
 come from the catalogue, not from Liquid — change a price in the admin and the
