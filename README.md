@@ -44,13 +44,6 @@ works with JavaScript disabled. The screenshot above was taken by a script that
 clicks the button on the homepage exactly as a customer would — not by calling
 the API.
 
-### 375px up
-
-![Shop grid on mobile](docs/screenshots/shop-grid-mobile.jpg)
-
-Two columns on mobile, four on desktop, matching the prototype's breakpoints. No
-horizontal overflow at 375, 768 or 1280.
-
 ### The rest of the page
 
 | | |
