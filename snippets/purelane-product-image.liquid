@@ -15,6 +15,8 @@
 
   Params:
     product   - product object (required unless image given)
+    art       - 'label' for the labelled bottle (shop cards), otherwise the
+                flat silhouette used everywhere else
     image     - explicit image object (optional, wins over product)
     sizes     - sizes attribute (default '(min-width: 860px) 260px, 45vw')
     priority  - true to eager-load + fetchpriority=high (hero only)
@@ -23,7 +25,28 @@
 {%- endcomment -%}
 
 {%- liquid
-  assign img = image | default: product.featured_image
+  # The prototype draws its products two ways, and which one it uses depends on
+  # where the product is standing.
+  #
+  #   flat   the pale silhouette from the --p-* custom properties. Used by the
+  #          hero stage, the rotator, the combo trays, the bundle tiers, the
+  #          range strip and the category tiles — every place a product is one
+  #          element of a group, where a legible label would be noise.
+  #   label  the fully drawn bottle: trigger head, glass highlights, floor
+  #          shadow, and a label with the leaf mark, the PURELANE wordmark,
+  #          the product name and the fill volume. Used on the shop cards,
+  #          where the product is the subject.
+  #
+  # A Shopify product has one featured image, so each carries both: media 1 is
+  # the silhouette and media 2 the labelled bottle. Passing art: 'label' takes
+  # the second, and falls back to the featured image when a product only has
+  # one — a merchant uploading a single photo still gets a working card.
+  assign art_image = product.featured_image
+  if art == 'label' and product.images.size > 1
+    assign art_image = product.images[1]
+  endif
+
+  assign img = image | default: art_image
   assign alt_text = alt | default: img.alt | default: product.title
   assign img_sizes = sizes | default: '(min-width: 860px) 260px, 45vw'
 

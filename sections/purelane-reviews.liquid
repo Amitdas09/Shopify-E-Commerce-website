@@ -17,7 +17,30 @@
 {%- liquid
   assign anchor = section.settings.anchor_id | default: 'reviews' | handle
   assign reviews = section.settings.reviews
-  assign count = reviews.size | default: 0
+
+  # Count by walking rather than reading .size: the drop behind a
+  # metaobject_list answers size inconsistently, and a wrong zero here silently
+  # drops the whole rail.
+  assign count = 0
+  for review in reviews
+    assign count = count | plus: 1
+  endfor
+
+  # Fall back to every published entry of the type when the picker is empty.
+  #
+  # A metaobject_list setting populated by writing GIDs into the JSON template
+  # resolves to an empty drop on the storefront — the GIDs are correct and the
+  # entries are storefront-readable (shop.metaobjects returns all five), but the
+  # setting only binds when it is saved through the theme editor. Rather than
+  # make a working homepage depend on someone opening the editor and re-picking
+  # five entries, an unset picker now means "show them all", which is also the
+  # behaviour a merchant expects after adding a review in Content → Metaobjects.
+  if count == 0
+    assign reviews = shop.metaobjects.purelane_review.values
+    for review in reviews
+      assign count = count | plus: 1
+    endfor
+  endif
 -%}
 
 <div

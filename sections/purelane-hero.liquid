@@ -21,7 +21,16 @@
   data-purelane-scene="{{ section.settings.scene_depth }}"
   data-purelane-hero
 >
-  <section class="purelane-hero" aria-labelledby="pl-hero-h-{{ section.id }}">
+  {%- comment -%}
+    The hero carries an anchor like every other section, so the progress rail
+    can hold a dot for it and the header's "Home" link has somewhere to go.
+    Without one the rail had nothing lit until you had scrolled past the fold.
+  {%- endcomment -%}
+  <section
+    class="purelane-hero"
+    id="{{ section.settings.anchor_id | default: 'top' | handle }}"
+    aria-labelledby="pl-hero-h-{{ section.id }}"
+  >
     <div class="hero-grid">
 
       {%- if promises.size > 0 -%}
@@ -201,6 +210,7 @@
   "class": "purelane-shell",
   "max_blocks": 8,
   "settings": [
+    { "type": "text", "id": "anchor_id", "label": "Anchor ID", "default": "top", "info": "Used by the progress rail and the nav." },
     {
       "type": "header",
       "content": "Headline"

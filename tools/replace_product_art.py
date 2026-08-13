@@ -121,19 +121,60 @@ def post_multipart(url, fields, filename, blob, content_type):
     raise last
 
 
+def upload_one(product, path, name, alt):
+    """Stage, POST and attach one file. Returns the media user errors, if any."""
+    blob = open(path, "rb").read()
+    ctype = mimetypes.guess_type(name)[0] or "image/png"
+
+    staged = call(STAGE, {"input": [{
+        "filename": name,
+        "mimeType": ctype,
+        "resource": "IMAGE",
+        "httpMethod": "POST",
+        "fileSize": str(len(blob)),
+    }]})
+    errs = staged["stagedUploadsCreate"]["userErrors"]
+    if errs:
+        return errs
+
+    target = staged["stagedUploadsCreate"]["stagedTargets"][0]
+    post_multipart(
+        target["url"],
+        [(p["name"], p["value"]) for p in target["parameters"]],
+        name, blob, ctype,
+    )
+
+    created = call(CREATE_MEDIA, {
+        "productId": product["id"],
+        "media": [{
+            "originalSource": target["resourceUrl"],
+            "mediaContentType": "IMAGE",
+            "alt": alt,
+        }],
+    })
+    return created["productCreateMedia"]["mediaUserErrors"]
+
+
 def main():
-    files = sorted(f for f in os.listdir(IMAGES) if f.endswith(".png"))
-    if not files:
-        sys.exit("No PNGs in %s — run tools/extract_product_art.py first." % IMAGES)
+    # Media order is the contract the theme reads: image 1 is the flat
+    # silhouette that most sections use, image 2 the labelled bottle the shop
+    # cards use. They are uploaded in that order, one product at a time, and
+    # productCreateMedia appends — so the order here is the order on the
+    # product. See snippets/purelane-product-image.liquid.
+    flat_dir = os.path.join(IMAGES, "flat")
+    label_dir = os.path.join(IMAGES, "label")
+    if not os.path.isdir(label_dir):
+        sys.exit("Run tools/extract_product_art.py and tools/make_labelled_art.py first.")
+
+    handles = sorted({
+        os.path.splitext(f)[0]
+        for d in (flat_dir, label_dir) if os.path.isdir(d)
+        for f in os.listdir(d) if f.endswith(".png")
+    })
 
     done = failed = 0
 
-    for name in files:
-        handle = os.path.splitext(name)[0]
-        path = os.path.join(IMAGES, name)
-        blob = open(path, "rb").read()
-        ctype = mimetypes.guess_type(name)[0] or "image/png"
-
+    for handle in handles:
         product = call(PRODUCT, {"handle": handle}).get("productByHandle")
         if not product:
             print("  !  %-32s no such product" % handle)
@@ -152,41 +193,33 @@ def main():
             # immediately gets it silently suffixed _1.
             time.sleep(1.5)
 
-        staged = call(STAGE, {"input": [{
-            "filename": name,
-            "mimeType": ctype,
-            "resource": "IMAGE",
-            "httpMethod": "POST",
-            "fileSize": str(len(blob)),
-        }]})
-        errs = staged["stagedUploadsCreate"]["userErrors"]
-        if errs:
-            print("  !  %-32s stage: %s" % (handle, errs))
+        plan = []
+        flat = os.path.join(flat_dir, handle + ".png")
+        label = os.path.join(label_dir, handle + ".png")
+        if os.path.exists(flat):
+            plan.append((flat, handle + ".png", product["title"]))
+        if os.path.exists(label):
+            # Distinct filename, or the second upload collides with the first
+            # and Shopify suffixes it anyway.
+            plan.append((label, handle + "-label.png",
+                         product["title"] + " — label detail"))
+
+        bad = None
+        for path, name, alt in plan:
+            errs = upload_one(product, path, name, alt)
+            if errs:
+                bad = errs
+                break
+            # Attachments land in call order, but only if they are sequential.
+            time.sleep(0.6)
+
+        if bad:
+            print("  !  %-32s %s" % (handle, bad))
             failed += 1
             continue
 
-        target = staged["stagedUploadsCreate"]["stagedTargets"][0]
-        post_multipart(
-            target["url"],
-            [(p["name"], p["value"]) for p in target["parameters"]],
-            name, blob, ctype,
-        )
-
-        created = call(CREATE_MEDIA, {
-            "productId": product["id"],
-            "media": [{
-                "originalSource": target["resourceUrl"],
-                "mediaContentType": "IMAGE",
-                "alt": product["title"],
-            }],
-        })
-        errs = created["productCreateMedia"]["mediaUserErrors"]
-        if errs:
-            print("  !  %-32s attach: %s" % (handle, errs))
-            failed += 1
-            continue
-
-        print("  ok %-32s replaced (%d KB)" % (handle, len(blob) // 1024))
+        print("  ok %-32s %s" % (handle, " + ".join(
+            os.path.basename(os.path.dirname(p)) for p, _, _ in plan)))
         done += 1
 
     print("\n%d replaced, %d failed" % (done, failed))

@@ -34,7 +34,7 @@ S["purelane_backdrop"] = {
     "settings": {"show_water": True, "show_vignette": True, "parallax": True},
 }
 
-rail = ["reviews Reviews", "ingredients Ingredients", "how How it works",
+rail = ["top Home", "reviews Reviews", "ingredients Ingredients", "how How it works",
         "proof Proof", "bundles Bundles", "shop Shop"]
 S["purelane_rail"] = {
     "type": "purelane-rail",
@@ -67,6 +67,7 @@ S["purelane_hero"] = {
     },
     "block_order": ["p1", "p2", "p3", "s1", "s2", "s3"],
     "settings": {
+        "anchor_id": "top",
         "heading": "Clean\nThat", "heading_highlight": "Lasts", "show_rule": True,
         "subheading": "Homecare that works on the toughest grime, made from plants. "
                       "Kind to your home, your family and the world outside it.",
@@ -179,7 +180,15 @@ S["purelane_range"] = {"type": "purelane-range", "settings": dict(PAD, **{
     "text": "Floors, taps, kitchen, laundry, bathroom and hands. Plant-based formulas "
             "that replace every harsh bottle under your sink.",
     "hint": "Swipe to see the full shelf", "source": "picked",
-    "products": BESTSELLERS, "products_to_show": 11,
+    # The prototype's shelf is ten bottles in this order, and they are exactly
+    # the ten it drew flat silhouettes for. The refill pouch has no silhouette
+    # in the source, so including it put one labelled bottle in a row of ten
+    # flat ones. It still appears in the shop grid and the bundle picker.
+    "products": ["floor-cleaner", "tap-cleaner-limescale-remover",
+                 "kitchen-cleaner-foaming", "toilet-cleaner", "laundry-detergent",
+                 "dishwash-gel", "copper-bronze-brass-cleaner",
+                 "washing-machine-cleaner", "liquid-handwash", "magic-eraser"],
+    "products_to_show": 10,
     "anchor_id": "range", "scene_depth": 3})}
 
 why = [("check", "Save up to 45%", "Versus buying the same products separately"),

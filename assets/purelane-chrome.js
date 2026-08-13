@@ -21,9 +21,13 @@
     if (frame) return;
     frame = window.requestAnimationFrame(function () {
       frame = null;
-      if (!header) return;
-      var y = window.scrollY || window.pageYOffset;
-      header.classList.toggle('up', y > 90);
+      if (header) {
+        var y = window.scrollY || window.pageYOffset;
+        header.classList.toggle('up', y > 90);
+      }
+      /* The observer alone cannot drive the rail, because its fallback depends
+         on scroll position rather than on an intersection changing. */
+      syncRail();
     });
   }
 
@@ -85,6 +89,27 @@
         bestId = el.id;
       }
     });
+
+    /* The observer band is the middle 10% of the viewport, which is precise
+       while a section is crossing it and empty the rest of the time: at the
+       top of the page, between two sections during a fast scroll, and any time
+       a section is shorter than the band. The rail then had no dot lit at all,
+       which reads as broken rather than as "between sections".
+
+       So when nothing is in the band, fall back to the last section that has
+       started — one rect read per link, only on that path. */
+    if (!bestId) {
+      var mid = window.innerHeight * 0.42;
+      links.forEach(function (a) {
+        var id = (a.getAttribute('href') || '').replace('#', '');
+        var el = id && document.getElementById(id);
+        if (el && el.getBoundingClientRect().top <= mid) bestId = id;
+      });
+      if (!bestId) {
+        var first = (links[0].getAttribute('href') || '').replace('#', '');
+        if (first) bestId = first;
+      }
+    }
 
     links.forEach(function (a) {
       var href = a.getAttribute('href') || '';

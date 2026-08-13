@@ -14,39 +14,46 @@
         "d1": {
           "type": "dot",
           "settings": {
+            "anchor": "top",
+            "label": "Home"
+          }
+        },
+        "d2": {
+          "type": "dot",
+          "settings": {
             "anchor": "reviews",
             "label": "Reviews"
           }
         },
-        "d2": {
+        "d3": {
           "type": "dot",
           "settings": {
             "anchor": "ingredients",
             "label": "Ingredients"
           }
         },
-        "d3": {
+        "d4": {
           "type": "dot",
           "settings": {
             "anchor": "how",
             "label": "How it works"
           }
         },
-        "d4": {
+        "d5": {
           "type": "dot",
           "settings": {
             "anchor": "proof",
             "label": "Proof"
           }
         },
-        "d5": {
+        "d6": {
           "type": "dot",
           "settings": {
             "anchor": "bundles",
             "label": "Bundles"
           }
         },
-        "d6": {
+        "d7": {
           "type": "dot",
           "settings": {
             "anchor": "shop",
@@ -60,7 +67,8 @@
         "d3",
         "d4",
         "d5",
-        "d6"
+        "d6",
+        "d7"
       ],
       "settings": {
         "label": "Section progress"
@@ -132,6 +140,7 @@
         "s3"
       ],
       "settings": {
+        "anchor_id": "top",
         "heading": "Clean\nThat",
         "heading_highlight": "Lasts",
         "show_rule": true,
@@ -459,19 +468,18 @@
         "hint": "Swipe to see the full shelf",
         "source": "picked",
         "products": [
+          "floor-cleaner",
           "tap-cleaner-limescale-remover",
           "kitchen-cleaner-foaming",
-          "copper-bronze-brass-cleaner",
-          "dishwash-gel",
-          "laundry-detergent",
-          "floor-cleaner",
           "toilet-cleaner",
-          "liquid-handwash",
+          "laundry-detergent",
+          "dishwash-gel",
+          "copper-bronze-brass-cleaner",
           "washing-machine-cleaner",
-          "magic-eraser",
-          "kitchen-degreaser-refill-pouch"
+          "liquid-handwash",
+          "magic-eraser"
         ],
-        "products_to_show": 11,
+        "products_to_show": 10,
         "anchor_id": "range",
         "scene_depth": 3
       }

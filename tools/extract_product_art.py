@@ -27,7 +27,7 @@ sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 PROTO = os.path.abspath(os.path.join(HERE, "..", "..", "purelane-homepage.html"))
-OUT = os.path.join(HERE, "seed-images")
+OUT = os.path.join(HERE, "seed-images", "flat")
 HEIGHT = 1600
 
 # prototype art key -> product handle it belongs on.
@@ -116,7 +116,7 @@ def main():
         browser.close()
 
     print("\n%d images written to %s" % (written, OUT))
-    print("upload with:  python tools/upload_images.py")
+    print("upload with:  python tools/replace_product_art.py")
 
 
 if __name__ == "__main__":

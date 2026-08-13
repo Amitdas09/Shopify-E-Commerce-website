@@ -36,7 +36,7 @@ import sys
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-OUT = os.path.join(HERE, "seed-images")
+OUT = os.path.join(HERE, "seed-images", "label")
 HEIGHT = 1600
 
 LEAF = (
