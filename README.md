@@ -7,8 +7,6 @@ original file was wrong for production — semantics, accessibility, performance
 theme-editor safety — it is fixed, and every fix is written up in
 [docs/BUILD-NOTES.md](docs/BUILD-NOTES.md).
 
-** Dev url : https://amits-store-qmbc0ab3.myshopify.com **
-**Password : Admin@2026** 
 
 **Live store:** `https://amits-store-qmbc0ab3.myshopify.com` · password on request
 
