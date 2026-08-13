@@ -22,6 +22,13 @@
   image_tag cannot take a hyphenated argument name — Liquid reads `data-note`
   as a subtraction — and this keeps the benefit lines in one place.
 {%- endcomment -%}
+{%- liquid
+  assign first_product = nil
+  for product in items limit: 1
+    assign first_product = product
+  endfor
+-%}
+
 {%- capture rotator_notes -%}
 [{% for product in items limit: 8 %}{{ product.metafields.purelane.benefit.value | default: '' | json }}{% unless forloop.last %},{% endunless %}{% endfor %}]
 {%- endcapture -%}
@@ -78,8 +85,8 @@
             </div>
 
             <p class="cap" aria-live="polite">
-              <b data-rot-name>{{ items.first.title }}</b>
-              <span data-rot-note>{{ items.first.metafields.purelane.benefit.value }}</span>
+              <b data-rot-name>{{ first_product.title }}</b>
+              <span data-rot-note>{{ first_product.metafields.purelane.benefit.value }}</span>
             </p>
 
             {%- if items.size > 1 -%}

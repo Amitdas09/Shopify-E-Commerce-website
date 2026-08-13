@@ -14,6 +14,19 @@ import os
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PAD = {"padding_top": 34, "padding_bottom": 34}
 
+
+# A collection created over the Admin API is NOT published to the Online Store
+# sales channel, so /collections/<handle> 404s and collection.products is empty
+# in Liquid. The sections looked broken while the data was fine.
+#
+# Publishing them needs write_publications, which the seeding token does not
+# carry. Referencing products directly by handle removes the dependency
+# entirely — a merchant can still switch any of these back to Collection in the
+# theme editor once the collection is published.
+BESTSELLERS = ['tap-cleaner-limescale-remover', 'kitchen-cleaner-foaming', 'copper-bronze-brass-cleaner', 'dishwash-gel', 'laundry-detergent', 'floor-cleaner', 'toilet-cleaner', 'liquid-handwash', 'washing-machine-cleaner', 'magic-eraser', 'kitchen-degreaser-refill-pouch']
+COMBO_PRODUCTS = ['kitchen-essentials-combo', 'laundry-care-bundle', 'complete-home-bundle', 'bathroom-deep-clean', 'hard-water-solution-kit']
+REVIEW_GIDS = ['gid://shopify/Metaobject/258093383754', 'gid://shopify/Metaobject/258093416522', 'gid://shopify/Metaobject/258093449290', 'gid://shopify/Metaobject/258093482058', 'gid://shopify/Metaobject/258093514826']
+
 S = collections.OrderedDict()
 
 S["purelane_backdrop"] = {
@@ -67,7 +80,8 @@ S["purelane_reviews"] = {"type": "purelane-reviews", "settings": dict(PAD, **{
     "kicker": "That" + "’" + "s what they said",
     "average_rating": "4.8", "rating_caption": "from 8,000+ reviews",
     "reach_prefix": "Loved by", "reach_number": "12 lakh+", "reach_suffix": "homes",
-    "rail_label": "Customer reviews", "anchor_id": "reviews", "scene_depth": 1})}
+    "rail_label": "Customer reviews", "reviews": REVIEW_GIDS,
+    "anchor_id": "reviews", "scene_depth": 1})}
 
 ings = [("coconut", "Coconut", "Plant-derived cleansers that lift grease"),
         ("orange-peel", "Orange peel", "Natural degreaser and fresh citrus lift"),
@@ -125,7 +139,7 @@ S["purelane_combos"] = {"type": "purelane-combos", "settings": dict(PAD, **{
     "kicker": "Pre-built to save you money", "heading": "Best selling combos", "show_rule": True,
     "subheading": "Swipe through the boxes people order most. Each one is already priced "
                   "below buying the same products on their own.",
-    "source": "collection", "collection": "combos", "combos_to_show": 6,
+    "source": "picked", "products": COMBO_PRODUCTS, "combos_to_show": 6,
     "button_label": "Shop bundle",
     "fine_print": "Inclusive of all taxes · COD available",
     "swipe_cue": "Swipe for more combos",
@@ -156,7 +170,7 @@ S["purelane_bundles"] = {
 
 S["purelane_shop"] = {"type": "purelane-product-grid", "settings": dict(PAD, **{
     "kicker": "Bestsellers", "heading": "Loved by 30,000 homes", "show_rule": True,
-    "source": "collection", "collection": "bestsellers", "products_to_show": 8,
+    "source": "picked", "products": BESTSELLERS[:8], "products_to_show": 8,
     "columns_desktop": 4, "show_rating": True,
     "anchor_id": "shop", "scene_depth": 3})}
 
@@ -164,8 +178,8 @@ S["purelane_range"] = {"type": "purelane-range", "settings": dict(PAD, **{
     "kicker": "The full range", "heading": "Every room, one shelf",
     "text": "Floors, taps, kitchen, laundry, bathroom and hands. Plant-based formulas "
             "that replace every harsh bottle under your sink.",
-    "hint": "Swipe to see the full shelf", "source": "collection",
-    "collection": "bestsellers", "products_to_show": 10,
+    "hint": "Swipe to see the full shelf", "source": "picked",
+    "products": BESTSELLERS, "products_to_show": 11,
     "anchor_id": "range", "scene_depth": 3})}
 
 why = [("check", "Save up to 45%", "Versus buying the same products separately"),

@@ -157,6 +157,13 @@
         "reach_number": "12 lakh+",
         "reach_suffix": "homes",
         "rail_label": "Customer reviews",
+        "reviews": [
+          "gid://shopify/Metaobject/258093383754",
+          "gid://shopify/Metaobject/258093416522",
+          "gid://shopify/Metaobject/258093449290",
+          "gid://shopify/Metaobject/258093482058",
+          "gid://shopify/Metaobject/258093514826"
+        ],
         "anchor_id": "reviews",
         "scene_depth": 1
       }
@@ -340,8 +347,14 @@
         "heading": "Best selling combos",
         "show_rule": true,
         "subheading": "Swipe through the boxes people order most. Each one is already priced below buying the same products on their own.",
-        "source": "collection",
-        "collection": "combos",
+        "source": "picked",
+        "products": [
+          "kitchen-essentials-combo",
+          "laundry-care-bundle",
+          "complete-home-bundle",
+          "bathroom-deep-clean",
+          "hard-water-solution-kit"
+        ],
         "combos_to_show": 6,
         "button_label": "Shop bundle",
         "fine_print": "Inclusive of all taxes · COD available",
@@ -417,8 +430,17 @@
         "kicker": "Bestsellers",
         "heading": "Loved by 30,000 homes",
         "show_rule": true,
-        "source": "collection",
-        "collection": "bestsellers",
+        "source": "picked",
+        "products": [
+          "tap-cleaner-limescale-remover",
+          "kitchen-cleaner-foaming",
+          "copper-bronze-brass-cleaner",
+          "dishwash-gel",
+          "laundry-detergent",
+          "floor-cleaner",
+          "toilet-cleaner",
+          "liquid-handwash"
+        ],
         "products_to_show": 8,
         "columns_desktop": 4,
         "show_rating": true,
@@ -435,9 +457,21 @@
         "heading": "Every room, one shelf",
         "text": "Floors, taps, kitchen, laundry, bathroom and hands. Plant-based formulas that replace every harsh bottle under your sink.",
         "hint": "Swipe to see the full shelf",
-        "source": "collection",
-        "collection": "bestsellers",
-        "products_to_show": 10,
+        "source": "picked",
+        "products": [
+          "tap-cleaner-limescale-remover",
+          "kitchen-cleaner-foaming",
+          "copper-bronze-brass-cleaner",
+          "dishwash-gel",
+          "laundry-detergent",
+          "floor-cleaner",
+          "toilet-cleaner",
+          "liquid-handwash",
+          "washing-machine-cleaner",
+          "magic-eraser",
+          "kitchen-degreaser-refill-pouch"
+        ],
+        "products_to_show": 11,
         "anchor_id": "range",
         "scene_depth": 3
       }
