@@ -1,4 +1,4 @@
-# Purelane — production Shopify sections
+# Purelane - production Shopify sections
 
 The `purelane-homepage.html` prototype, rebuilt as sections for stock **Dawn**.
 
@@ -9,6 +9,7 @@ theme-editor safety — it is fixed, and every fix is written up in
 
 
 **Live store:** https://amits-store-qmbc0ab3.myshopify.com 
+
 **Password on request** : Admin@2026
 
 ---
